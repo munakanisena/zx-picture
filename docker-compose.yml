@@ -1,0 +1,57 @@
+networks: #默认网络
+  default:
+    name: zx-picture
+    driver: bridge
+
+services:
+  web:
+    image: ghcr.io/munakanisena/zx-picture-frontend:latest
+    ports:
+      - 80:80
+      - 403:403
+    restart: always
+
+  server:
+    image: ghcr.io/munakanisena/zx-picture-backend:latest
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL
+      - SPRING_DATASOURCE_USERNAME
+      - SPRING_DATASOURCE_PASSWORD
+      - SPRING_REDIS_HOST
+      - SPRING_REDIS_PASSWORD
+      - SPRING_MAIL_USERNAME
+      - SPRING_MAIL_PASSWORD
+      - COS_CLIENT_SECRET_ID
+      - COS_CLIENT_SECRET_KEY
+      - COS_CLIENT_BUCKET_NAME
+      - COS_CLIENT_HOST
+      - COS_CLIENT_REGION
+      - ALIYUN_BAILIAN_SERET_KEY
+    ports:
+      - 8123:8123
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./sql/new_create-table_zx.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: always
+
+  redis:
+    image: redis:7.2.1
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./data/redis:/data # 数据持久化
+    ports:
+      - 6379:6379
+    restart: always

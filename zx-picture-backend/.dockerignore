@@ -1,0 +1,25 @@
+# IDE 和操作系统文件
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Maven构建生成的目录
+/target/
+/dist/
+/build/
+
+# 本地依赖和缓存
+/node_modules/
+/vendor/
+/npm-debug.log*
+/yarn-error.log*
+
+# 本地配置文件
+.env
+.env.*.local
+*.properties.local
+
+# 日志文件
+logs/
+*.log
