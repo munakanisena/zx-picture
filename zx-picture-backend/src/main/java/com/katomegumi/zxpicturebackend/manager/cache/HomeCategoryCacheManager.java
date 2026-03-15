@@ -26,7 +26,7 @@ public class HomeCategoryCacheManager {
 
     private final PictureCategoryMapper pictureCategoryMapper;
 
-    @Cacheable(cacheManager = CacheConstant.CAFFEINE_CACHE_MANAGER, value = CacheConstant.HOME_CATEGORY_CACHE_NAME)
+    @Cacheable(cacheManager = CacheConstant.CAFFEINE_CACHE_MANAGER, value = CacheConstant.HOME_CATEGORY_CACHE_NAME,sync = true)
     public List<CategoryVO> listHomeCategories() {
         LambdaQueryWrapper<PictureCategory> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         //获取顶层分类即可

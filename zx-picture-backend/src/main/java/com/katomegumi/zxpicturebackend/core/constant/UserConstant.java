@@ -3,9 +3,9 @@ package com.katomegumi.zxpicturebackend.core.constant;
 import lombok.experimental.UtilityClass;
 
 /**
- * user常量类
  *
- * @author katoMegumi
+ * @author Megumi
+ * @description user常量类
  */
 @UtilityClass
 public class UserConstant {

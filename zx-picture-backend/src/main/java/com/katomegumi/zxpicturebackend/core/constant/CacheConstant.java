@@ -3,7 +3,7 @@ package com.katomegumi.zxpicturebackend.core.constant;
 import lombok.experimental.UtilityClass;
 
 /**
- * @author : katoMegumi
+ * @author : Megumi
  * @description : Cache常量  key:业务名称+数据名
  * @createDate : 2025/5/3 下午10:16
  */

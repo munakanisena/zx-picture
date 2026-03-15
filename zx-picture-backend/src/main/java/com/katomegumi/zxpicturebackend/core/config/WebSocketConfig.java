@@ -21,10 +21,12 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final WsHandshakeInterceptor wsHandshakeInterceptor;
 
+    private final CorsProperties corsProperties;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(pictureEditHandler, "/ws/picture/edit")
                 .addInterceptors(wsHandshakeInterceptor)
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(corsProperties.getAllowOrigins().toArray(new String[0]));
     }
 }

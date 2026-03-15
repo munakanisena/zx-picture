@@ -2,6 +2,7 @@ package com.katomegumi.zxpicturebackend.model.dto.picture;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**

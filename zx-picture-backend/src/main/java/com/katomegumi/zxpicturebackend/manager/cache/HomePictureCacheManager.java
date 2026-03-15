@@ -41,7 +41,8 @@ public class HomePictureCacheManager {
             , value = CacheConstant.HOME_PICTURE_CACHE_NAME,
             key = "(#pictureQueryRequest.categoryId != null ? #pictureQueryRequest.categoryId + '::' : '' )+ " +
                     "(#pictureQueryRequest.searchText != null ? #pictureQueryRequest.searchText + '::' : '' )+ " +
-                    "(#pictureQueryRequest.current + '-' + #pictureQueryRequest.pageSize)"
+                    "(#pictureQueryRequest.current + '-' + #pictureQueryRequest.pageSize)",
+            sync = true
     )
     public PageVO<PictureHomeVO> pageHomePictures(LambdaQueryWrapper<PictureInfo> lambdaQueryWrapper, PictureQueryRequest pictureQueryRequest) {
         Page<PictureInfo> picturePage = pictureInfoMapper.selectPage(pictureQueryRequest.getPage(PictureInfo.class), lambdaQueryWrapper);

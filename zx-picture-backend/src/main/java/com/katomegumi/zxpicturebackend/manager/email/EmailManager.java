@@ -36,9 +36,6 @@ public class EmailManager {
 
     private final VerifyCaptchaCacheManager verifyCaptchaCacheManager;
 
-    @Value("${verify.code.length}")
-    //验证码长度
-    private int length;
     //发件人名称
     @Value("${spring.mail.nickname}")
     private String nickname;
@@ -49,28 +46,25 @@ public class EmailManager {
     /**
      * 发送邮件注册验证码
      * @param to 收件人
-     * todo 由于这里用的异步线程 所以这里抛出的异常controller捕获不到 暂时前端做校验
      */
     @Async(value = "emailThreadPool")
-    public void sendEmailCaptcha(String to) {
+    public void sendEmailCaptcha(String to,String captcha) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setFrom(nickname + "<" + from + ">");
             mimeMessageHelper.setTo(to);
             mimeMessageHelper.setSubject("惠眸图界 - 注册验证码");
-            //获取验证码
-            String randomCaptcha = EmailUtils.getRandomCaptcha(length);
-            //将验证码存入redis
-            verifyCaptchaCacheManager.putCaptchaIntoRedis(randomCaptcha, to);
             //获取邮件模版
             Context context = new Context();
-            context.setVariable(CacheConstant.EMAIL.GET_CAPTCHA, randomCaptcha);
+            context.setVariable(CacheConstant.EMAIL.GET_CAPTCHA, captcha);
             String htmlContent = templateEngine.process("RegisterTemplate.html", context);
             mimeMessageHelper.setText(htmlContent,true);
             javaMailSender.send(mimeMessage);
+            log.info("邮件发送成功: to={} captcha={}",to,captcha);
         } catch (MessagingException e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"邮件验证码发送失败");
+            //考虑补偿机制
+            log.error("邮件发送失败: to={}, error={}", to, e.getMessage());
         }
     }
 
@@ -79,25 +73,22 @@ public class EmailManager {
      * @param to 收件人
      */
     @Async(value = "emailThreadPool")
-    public void sendEmailForgotPassword(String to) {
+    public void sendEmailForgotPassword(String to,String captcha) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setFrom(nickname + "<" + from + ">");
             mimeMessageHelper.setTo(to);
             mimeMessageHelper.setSubject("惠眸图界 - 重置密码");
-            //获取随机验证码
-            String randomCaptcha = EmailUtils.getRandomCaptcha(length);
-            //添加到redis 重置密码不做限制
-            verifyCaptchaCacheManager.set(CacheConstant.EMAIL.FORGOT + to, randomCaptcha, 5, TimeUnit.MINUTES);
             //获取邮件模版
             Context context = new Context();
-            context.setVariable(CacheConstant.EMAIL.GET_CAPTCHA, randomCaptcha);
+            context.setVariable(CacheConstant.EMAIL.GET_CAPTCHA, captcha);
             String htmlContent = templateEngine.process("ForgotPasswordTemplate.html", context);
             mimeMessageHelper.setText(htmlContent,true);
             javaMailSender.send(mimeMessage);
+            log.info("邮件发送成功: to={} captcha={}",to,captcha);
         } catch (MessagingException e){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"邮件验证码发送失败");
+            log.error("邮件发送失败: to={}, error={}", to, e.getMessage());
     }
     }
 }

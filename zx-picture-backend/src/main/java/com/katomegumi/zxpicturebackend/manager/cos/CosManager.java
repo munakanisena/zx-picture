@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * @author Megumi
- * 腾讯云对象存储服务
+ * @description 腾讯云对象存储服务
  */
 @Component
 @RequiredArgsConstructor
@@ -36,7 +36,6 @@ public class CosManager {
 
     private final COSClient cosClient;
 
-    //一些 cos操作
 
 
     /**

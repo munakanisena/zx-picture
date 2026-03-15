@@ -59,7 +59,7 @@ public class PictureEditBroadcaster {
      * @throws Exception 异常
      */
     public void broadcastToPicture(Long pictureId, PictureEditResponseMessage pictureEditResponseMessage, WebSocketSession excludeSession) throws Exception {
-        //拿到所有当前正在编辑的用户会话
+        //拿到所有进入当前编辑的用户会话
         Set<WebSocketSession> sessions = pictureEditSessions.get(pictureId);
 
         if (CollUtil.isNotEmpty(sessions)) {

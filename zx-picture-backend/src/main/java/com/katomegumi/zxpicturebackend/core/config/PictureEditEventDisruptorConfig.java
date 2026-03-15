@@ -5,6 +5,7 @@ import cn.hutool.core.thread.ThreadFactoryBuilder;
 import com.katomegumi.zxpicturebackend.manager.websocket.disruptor.PictureEditEvent;
 import com.katomegumi.zxpicturebackend.manager.websocket.disruptor.PictureEditEventWorkHandler;
 import com.lmax.disruptor.dsl.Disruptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,12 +13,14 @@ import javax.annotation.Resource;
 
 
 /**
- * 配置队列
+ * @author : Megumi
+ * @description : 队列配置
  */
 @Configuration
+@RequiredArgsConstructor
 public class PictureEditEventDisruptorConfig {
-    @Resource
-    private PictureEditEventWorkHandler pictureEditEventWorkHandler;
+
+    private final PictureEditEventWorkHandler pictureEditEventWorkHandler;
 
     @Bean("pictureEditEventDisruptor")
     public Disruptor<PictureEditEvent> messageModelRingBuffer() {

@@ -23,9 +23,9 @@ import java.util.Map;
 
 
 /**
- * 自定义权限加载接口实现类 最好只使用一个获取权限码的方法 避免混乱
  *
  * @author Megumi
+ * @description   自定义权限加载接口实现类 最好只使用一个获取权限码的方法 避免混乱
  */
 @Component
 @RequiredArgsConstructor

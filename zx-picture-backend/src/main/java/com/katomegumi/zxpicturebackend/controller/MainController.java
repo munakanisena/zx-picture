@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author katoMegumi
+ * @author Megumi
  * @description : 测试
  */
 @RestController

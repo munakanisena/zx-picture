@@ -2,6 +2,7 @@ package com.katomegumi.zxpicturebackend.core.common.util;
 
 import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
 import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
+import lombok.experimental.UtilityClass;
 
 /**
  * 简化响应

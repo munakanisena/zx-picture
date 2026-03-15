@@ -5,8 +5,8 @@ import lombok.experimental.UtilityClass;
 import java.awt.*;
 
 /**
- * 工具类 计算图片相似度
  * @author Megumi
+ * @description 工具类 计算图片相似度
  */
 @UtilityClass
 public class ColorSimilarUtils {

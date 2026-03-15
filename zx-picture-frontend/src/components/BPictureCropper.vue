@@ -59,6 +59,8 @@ const props = defineProps<{
   spaceType?: number
 }>()
 
+//todo 关闭模态框的同时也需要 关闭 websocket 连接
+
 // 是否为团队空间
 const isTeamSpace = computed(() => {
   return Number(props.spaceType) === SPACE_TYPE_ENUM.TEAM
@@ -256,7 +258,7 @@ const editAction = (action: string) => {
 }
 
 watchEffect(() => {
-  // 团队空间才初始化
+  // 团队空间初始化
   if (isTeamSpace.value) {
     initWebsocket()
   }

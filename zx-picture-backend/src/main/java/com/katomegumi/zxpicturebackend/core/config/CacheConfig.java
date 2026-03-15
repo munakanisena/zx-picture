@@ -1,6 +1,11 @@
 package com.katomegumi.zxpicturebackend.core.config;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
 import org.springframework.cache.CacheManager;
@@ -11,7 +16,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -21,11 +28,31 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author : Megumi
- * @description : 缓存配置类 多级缓存
+ * @description : 缓存配置类
  * @createDate : 2025/5/27 下午9:08
  */
 @Configuration
 public class CacheConfig {
+    //用于底层操作redis
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(factory);
+        Jackson2JsonRedisSerializer<String> jackson2JsonSerializer = new Jackson2JsonRedisSerializer<>(String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY);
+        jackson2JsonSerializer.setObjectMapper(objectMapper);
+        // 设置序列化方式
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(jackson2JsonSerializer);
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(jackson2JsonSerializer);
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
+
     // Caffeine 缓存管理器 - 用于图片分类 (这里需要指定默认的管理器)
     @Bean
     @Primary

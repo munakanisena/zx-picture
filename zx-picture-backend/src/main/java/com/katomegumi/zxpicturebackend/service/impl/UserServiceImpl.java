@@ -15,8 +15,10 @@ import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
 import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
 import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
 import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.core.util.EmailUtils;
 import com.katomegumi.zxpicturebackend.core.util.SFunctionUtils;
 import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
+import com.katomegumi.zxpicturebackend.manager.cache.UserCacheManager;
 import com.katomegumi.zxpicturebackend.manager.cache.VerifyCaptchaCacheManager;
 import com.katomegumi.zxpicturebackend.manager.email.EmailManager;
 import com.katomegumi.zxpicturebackend.manager.email.model.EmailRequest;
@@ -32,12 +34,14 @@ import com.katomegumi.zxpicturebackend.model.vo.user.UserVO;
 import com.katomegumi.zxpicturebackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.katomegumi.zxpicturebackend.core.constant.CacheConstant.USER.USER_LOGIN_STATE;
@@ -60,21 +64,26 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     private final VerifyCaptchaCacheManager verifyCaptchaCacheManager;
 
+    private final UserCacheManager userCacheManager;
+
     private final PictureFileUpload pictureFileUpload;
+
+    @Value("${verify.code.length}")
+    //验证码长度
+    private int length;
 
 
     @Override
     public void sendEmailRegisterCaptcha(EmailRequest emailRequest) {
         String userEmail = emailRequest.getUserEmail();
-        //1.邮箱格式是否正确
         ThrowUtils.throwIf(!ReUtil.isMatch(RegexPool.EMAIL, userEmail), ErrorCode.PARAMS_ERROR, "邮箱格式错误");
-        //2.判断邮箱是否已经注册
         Long count = userInfoMapper.selectCount(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getEmail, userEmail));
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱已被注册");
         }
-        //3.发送验证码
-        emailManager.sendEmailCaptcha(userEmail);
+        String randomCaptcha = EmailUtils.getRandomCaptcha(length);
+        verifyCaptchaCacheManager.putCaptchaIntoRedis(randomCaptcha, userEmail);
+        emailManager.sendEmailCaptcha(userEmail,randomCaptcha);
     }
 
     @Override
@@ -90,14 +99,14 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         ThrowUtils.throwIf(!ReUtil.isMatch(RegexPool.EMAIL, userEmail), ErrorCode.PARAMS_ERROR, "邮箱格式错误");
 
         //2.用户名是否可用
-        Long count = userInfoMapper.selectCount(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getName, password));
+        Long count = userInfoMapper.selectCount(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getName, username));
         if (count > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被存在,请重新输入");
         }
 
         //3.校验密码长度 用户名称长度
         ThrowUtils.throwIf(password.length() < 8 || confirmPassword.length() < 8, ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
-        ThrowUtils.throwIf(username.length() > 16, ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
+        ThrowUtils.throwIf(username.length() > 16||confirmPassword.length() > 16, ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
 
         //4.校验
         ThrowUtils.throwIf(!password.equals(confirmPassword), ErrorCode.PARAMS_ERROR, "两次密码不一致");
@@ -149,25 +158,22 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         //用户是否被禁用
         ThrowUtils.throwIf(UserDisabledEnum.isDisabled(userInfo.getIsDisabled()), ErrorCode.FORBIDDEN_ERROR, "用户已被禁用");
 
-        //默认为cookie记住模式
         StpKit.USER.login(userInfo.getId());
-        StpKit.USER.getSession().set(USER_LOGIN_STATE, userInfo);
-
+        userCacheManager.setUserCache(userInfo);
         return BeanUtil.toBean(userInfo, UserDetailVO.class);
     }
 
     @Override
     public void forgotPassword(EmailRequest emailRequest) {
-        //1.校验邮箱格式
         String userEmail = emailRequest.getUserEmail();
         ThrowUtils.throwIf(!ReUtil.isMatch(RegexPool.EMAIL, userEmail), ErrorCode.PARAMS_ERROR, "邮箱格式错误");
-        //2.查询用户是否存在
         Long count = userInfoMapper.selectCount(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getEmail, userEmail));
         if (count < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
-        //3.发送邮件
-        emailManager.sendEmailForgotPassword(userEmail);
+        String randomCaptcha = EmailUtils.getRandomCaptcha(length);
+        verifyCaptchaCacheManager.set(CacheConstant.EMAIL.FORGOT + userEmail, randomCaptcha, 5, TimeUnit.MINUTES);
+        emailManager.sendEmailForgotPassword(userEmail,randomCaptcha);
     }
 
 
@@ -211,15 +217,18 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         return BeanUtil.copyProperties(userInfo, UserDetailVO.class);
     }
 
+    @Override
+    public UserDetailVO getUserDetailById(Long userId) {
+        UserInfo userInfo = userCacheManager.getUserDetailVOCache(userId);
+        return BeanUtil.copyProperties(userInfo, UserDetailVO.class);
+    }
 
     @Override
     public String uploadAvatar(MultipartFile avatarFile) {
         long userId = StpKit.USER.getLoginIdAsLong();
-        //1. 上传地址前缀 avatar/用户id/图片名称
+        //上传地址前缀 avatar/用户id/图片名称
         String pathPrefix = "avatar/" + userId + "/";
-        //2.上头图片
         UploadPictureResult uploadPictureResult = pictureFileUpload.uploadPicture(avatarFile, pathPrefix, false);
-        //3.设置用户图片
         String avatarUrl = uploadPictureResult.getOriginUrl();
         ThrowUtils.throwIf(StrUtil.isBlank(avatarUrl), ErrorCode.OPERATION_ERROR, "上传头像失败");
         UserInfo userInfo = new UserInfo();
@@ -227,9 +236,8 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setAvatar(avatarUrl);
         boolean result = this.updateById(userInfo);
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "头像更新失败");
-        //4.删除缓存
-        StpKit.USER.getSession().clear();
-        //5.返回图片地址
+
+        userCacheManager.deleteUserCache(userId);
         return avatarUrl;
     }
 
@@ -249,35 +257,22 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户信息修改失败");
         }
-        //清除旧缓存
-        StpKit.USER.getSession().clear();
+        userCacheManager.deleteUserCache(userEditRequest.getId());
     }
 
     @Override
-    public UserDetailVO getUserDetailById(Long userId) {
-        //未登录就创建对应session
-        UserInfo userInfo = (UserInfo) StpKit.USER.getSessionByLoginId(userId, true).get(USER_LOGIN_STATE);
-        if (userInfo == null) {
-            //2.查看数据库中是否有该用户
-            userInfo = this.getById(userId);
-            StpKit.USER.getSessionByLoginId(userId).set(USER_LOGIN_STATE, userInfo);
-            ThrowUtils.throwIf(userInfo == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
-        }
-        return BeanUtil.copyProperties(userInfo, UserDetailVO.class);
-    }
-
-    @Override
-    public void deleteUserById(Long id) {
-        UserInfo userInfo = this.getById(id);
+    public void deleteUserById(Long userId) {
+        UserInfo userInfo = this.getById(userId);
         if (userInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
-        boolean result = this.removeById(id);
+        boolean result = this.removeById(userId);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户信息删除失败");
         }
         //清除登录态
-        StpKit.USER.logout(userInfo.getId());
+        userCacheManager.deleteUserCache(userId);
+        StpKit.USER.logout(userId);
     }
 
 
@@ -290,7 +285,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户信息修改失败");
         }
-        StpKit.USER.getSessionByLoginId(userUpdateRequest.getId()).clear();
+        userCacheManager.deleteUserCache(userUpdateRequest.getId());
     }
 
     @Override
@@ -302,9 +297,8 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
                 page.getSize(),
                 page.getTotal(),
                 page.getPages(),
-                Optional.
-                        ofNullable(page.getRecords()).
-                        orElse(Collections.emptyList())
+                Optional.ofNullable(page.getRecords())
+                        .orElse(Collections.emptyList())
                         .stream()
                         .map(userInfo -> BeanUtil.copyProperties(userInfo, UserVO.class))
                         .collect(Collectors.toList())
@@ -313,13 +307,8 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Override
     public UserInfo getCurrentUserInfo() {
-        UserInfo userInfo = (UserInfo) StpKit.USER.getSession().get(USER_LOGIN_STATE);
-        if (userInfo == null) {
-            userInfo = this.getById(StpKit.USER.getLoginIdAsLong());
-            //重新设置
-            StpKit.USER.getSession().set(USER_LOGIN_STATE, userInfo);
-        }
-        return userInfo;
+        long userId = StpKit.USER.getLoginIdAsLong();
+        return userCacheManager.getUserDetailVOCache(userId);
     }
 
     @Override

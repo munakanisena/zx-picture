@@ -10,7 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.annotation.PostConstruct;
 
 /**
- * 开启SA-TOKEN 注解鉴权
+ * @author Megumi
+ * @description 开启SA-TOKEN 注解鉴权
  */
 @Configuration
 public class SaTokenConfigure implements WebMvcConfigurer {

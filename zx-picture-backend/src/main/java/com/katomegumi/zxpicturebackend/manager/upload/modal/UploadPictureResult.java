@@ -3,8 +3,8 @@ package com.katomegumi.zxpicturebackend.manager.upload.modal;
 import lombok.Data;
 
 /**
- * 解析图片 封装对象 (可直接转换picture实体类)
  * @author Megumi
+ * @description 解析图片 封装对象 (可直接转换picture实体类)
  */
 @Data
 public class UploadPictureResult {

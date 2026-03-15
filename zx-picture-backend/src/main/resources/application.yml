@@ -17,7 +17,7 @@ server:
   #端口号
   port: 8123
   servlet:
-    #指定上下文路径 也就是说 要输入localhost:8080/api 才能访问到
+    #指定上下文路径 也就是说 要输入localhost:8123/api 才能访问到
     context-path: /api
 --- #------------------数据库配置------------------
 spring:

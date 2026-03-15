@@ -1,11 +1,12 @@
 package com.katomegumi.zxpicturebackend.manager.cache;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
 import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
 import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.core.util.RedisUtils;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class VerifyCaptchaCacheManager {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisUtils redisUtils;
 
     /**
      * 验证码存入redis中 并且做限制
@@ -31,25 +32,25 @@ public class VerifyCaptchaCacheManager {
      */
     public void putCaptchaIntoRedis(String captcha,String to){
         String key = CacheConstant.EMAIL.REGISTER + to;
-        BoundHashOperations<String, String, String> boundHashOps = stringRedisTemplate.boundHashOps(key);
+        BoundHashOperations<String, String, String> boundHashOps = redisUtils.boundHashOperations(key);
         //获取最后一次发送邮件的事件
         String lastSendTime = boundHashOps.get(CacheConstant.EMAIL.LAST_SEND_TIME);
         //获取一共发送多少邮件
         String sendCount = boundHashOps.get(CacheConstant.EMAIL.COUNT);
 
-        if (StringUtils.isBlank(lastSendTime) && StringUtils.isBlank(sendCount)) {
+        if (StrUtil.isBlank(lastSendTime) && StrUtil.isBlank(sendCount)) {
             boundHashOps.put(CacheConstant.EMAIL.CAPTCHA, captcha);
             boundHashOps.put(CacheConstant.EMAIL.LAST_SEND_TIME, String.valueOf(System.currentTimeMillis()));
             boundHashOps.put(CacheConstant.EMAIL.COUNT, "1");
             boundHashOps.expire(5, TimeUnit.MINUTES);
             return;
         }
-        if(StringUtils.isNotBlank(sendCount)&&Integer.parseInt(sendCount)>=5) {
+        if(StrUtil.isNotBlank(sendCount)&&Integer.parseInt(sendCount)>=5) {
             //覆盖设置 24小时后过期
             boundHashOps.expire(24, TimeUnit.HOURS);
             throw new BusinessException(ErrorCode.OPERATION_ERROR,"验证码发送频繁,24小时重试");
         }
-        if (StringUtils.isNotBlank(lastSendTime)){
+        if (StrUtil.isNotBlank(lastSendTime)){
             long elapsedTime = System.currentTimeMillis() - Long.parseLong(lastSendTime);
             if (elapsedTime < 1000 * 60) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR,"验证码发送频繁,1分钟重试");
@@ -63,38 +64,35 @@ public class VerifyCaptchaCacheManager {
     }
 
     /**
-     * 插入数据
-     */
-    public void set(String key,String value,long expire,TimeUnit timeUnit) {
-        stringRedisTemplate.opsForValue().set(key,value,expire,timeUnit);
-    }
-
-    /**
      * 校验注册验证码
-     * @param key
-     * @param captcha
+     * @param key 键值
+     * @param captcha 验证码
      * @return
      */
     public boolean verifyCaptchaOk(String key,String captcha) {
-        return ObjectUtil.equals(stringRedisTemplate.opsForHash().get(key, CacheConstant.EMAIL.CAPTCHA), captcha);
+        return ObjectUtil.equals(redisUtils.hGet(key, CacheConstant.EMAIL.CAPTCHA), captcha);
     }
 
     /**
      * 校验重置验证码
-     * @param key
-     * @param captcha
+     * @param key 键值
+     * @param captcha 验证码
      * @return
      */
     public boolean verifyForgotCaptchaOk(String key,String captcha) {
-        return ObjectUtil.equals(stringRedisTemplate.opsForValue().get(key),captcha);
+        return ObjectUtil.equals(redisUtils.get(key),captcha);
+    }
+
+    public void set(String key, String randomCaptcha, int et, TimeUnit timeUnit) {
+        redisUtils.set(key,randomCaptcha,et,timeUnit);
     }
 
     /**
      * 删除验证码
-     * @param key
+     * @param key 键值
      */
     public void removeCaptcha(String key) {
-      stringRedisTemplate.delete(key);
+      redisUtils.delete(key);
     }
 }
 
