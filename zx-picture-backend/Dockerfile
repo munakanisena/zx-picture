@@ -6,7 +6,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # 阶段2：构建最终运行镜像
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-alpine
 # 暴露应用端口(提供文档和网络配置信息)
 # 向外界声明这个容器内部有一个服务正在监听 EXPOSE 后指定的端口。
 EXPOSE 8123
