@@ -209,6 +209,8 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> imple
 
     @Override
     public void userLogout() {
+        Long userId = StpKit.USER.getLoginIdAsLong();
+        userCacheManager.deleteUserCache(userId);
         StpKit.USER.logout();
         StpKit.SPACE.logout();
     }
