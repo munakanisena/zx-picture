@@ -2,23 +2,23 @@ package com.katomegumi.zxpicturebackend.controller;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.req.DeleteRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaUserCheckLogin;
-import com.katomegumi.zxpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceRoleEnum;
-import com.katomegumi.zxpicturebackend.model.vo.space.user.SpaceUserVO;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.req.DeleteRequest;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserAddRequest;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserEditRequest;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserQueryRequest;
+import com.katomegumi.zxpicturebackend.enums.SpaceRoleEnum;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
+import com.katomegumi.zxpicturebackend.security.annotation.SaSpaceCheckPermission;
+import com.katomegumi.zxpicturebackend.security.annotation.SaUserCheckLogin;
+import com.katomegumi.zxpicturebackend.security.model.SpaceUserPermissionConstant;
 import com.katomegumi.zxpicturebackend.service.SpaceUserService;
+import com.katomegumi.zxpicturebackend.vo.space.user.SpaceUserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 空间用户管理
  */
 @SaUserCheckLogin
@@ -49,8 +49,8 @@ public class SpaceUserController {
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.SPACE_USER_MANAGE)
     public BaseResponse<Boolean> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         ThrowUtils.throwIf(spaceUserAddRequest == null, ErrorCode.PARAMS_ERROR);
-        ThrowUtils.throwIf(ObjUtil.hasNull(spaceUserAddRequest.getSpaceId(), spaceUserAddRequest.getUserId()), ErrorCode.PARAMS_ERROR);
-        ThrowUtils.throwIf(StrUtil.isBlank(spaceUserAddRequest.getSpaceRole()), ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(ObjUtil.isNull(spaceUserAddRequest.getSpaceId()), ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(StrUtil.hasBlank(spaceUserAddRequest.getSpaceRole(),spaceUserAddRequest.getUserName()), ErrorCode.PARAMS_ERROR);
         //根据枚举校验
         ThrowUtils.throwIf(!SpaceRoleEnum.getKeys().contains(spaceUserAddRequest.getSpaceRole()), ErrorCode.PARAMS_ERROR);
         spaceUserService.addSpaceUser(spaceUserAddRequest);

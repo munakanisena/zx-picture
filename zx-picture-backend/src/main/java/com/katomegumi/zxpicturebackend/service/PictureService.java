@@ -2,14 +2,14 @@ package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.GetOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.search.model.SearchPictureResult;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dto.picture.*;
-import com.katomegumi.zxpicturebackend.model.vo.picture.*;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.GetOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.search.model.SearchPictureResult;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.dto.picture.*;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.vo.picture.*;
 import lombok.SneakyThrows;
 
 import java.text.ParseException;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_info(图片信息表)】的数据库操作Service
  * @createDate 2025-05-24 14:26:44
  */
@@ -126,7 +126,7 @@ public interface PictureService extends IService<PictureInfo> {
      *
      * @param redisKey
      * @param pictureIds
-     * @return
+     * @return 获取redis指定key的变化量
      */
     Map<Long, Integer> getRedisDeltas(String redisKey, List<Long> pictureIds);
 

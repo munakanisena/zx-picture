@@ -1,23 +1,18 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.disruptor;
 
-import cn.hutool.json.JSONUtil;
 import com.katomegumi.zxpicturebackend.manager.websocket.handler.PictureEditHandler;
-import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditResponseMessage;
-import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEditMessageTypeEnum;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
 import com.katomegumi.zxpicturebackend.service.UserService;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 
 /**
  * 消费者  WorkHandler<PictureEditEvent> 泛型是自定义的消息事件
+ *
+ * @author lr
  */
 @Slf4j
 @Component

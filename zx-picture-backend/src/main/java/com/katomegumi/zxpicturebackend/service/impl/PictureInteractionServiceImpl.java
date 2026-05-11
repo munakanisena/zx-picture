@@ -3,15 +3,15 @@ package com.katomegumi.zxpicturebackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInteraction;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.PictureInteractionMapper;
-import com.katomegumi.zxpicturebackend.model.dto.picture.PictureInteractionRequest;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionStatusEnum;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionTypeEnum;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
+import com.katomegumi.zxpicturebackend.entity.PictureInteraction;
+import com.katomegumi.zxpicturebackend.mapper.PictureInteractionMapper;
+import com.katomegumi.zxpicturebackend.dto.picture.PictureInteractionRequest;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionStatusEnum;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionTypeEnum;
 import com.katomegumi.zxpicturebackend.service.PictureInteractionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_interaction(图片交互表)】的数据库操作Service实现
  * @createDate 2025-05-27 18:32:56
  */

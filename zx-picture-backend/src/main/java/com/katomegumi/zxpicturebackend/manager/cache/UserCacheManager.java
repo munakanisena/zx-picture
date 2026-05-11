@@ -1,24 +1,21 @@
 package com.katomegumi.zxpicturebackend.manager.cache;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.core.util.RedisUtils;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.UserInfoMapper;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.common.util.RedisUtils;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.mapper.UserInfoMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 用户缓存管理
  * @createDate : 2026/3/15 下午3:59
  */
@@ -32,52 +29,54 @@ public class UserCacheManager {
 
     /**
      * 基于实体 添加缓存  UserDetailVO 类型
+     *
      * @param userInfo 用户实体
      */
-    public void setUserCache(UserInfo userInfo){
-        redisUtils.set(CacheConstant.USER.USER_LOGIN_STATE+userInfo.getId(),
-                JSONUtil.toJsonStr(userInfo),
-                RandomUtil.randomInt(10)+30,
-                TimeUnit.MINUTES);
+    public void setUserCache(UserInfo userInfo) {
+        redisUtils.set(CacheConstant.USER.USER_LOGIN_STATE + userInfo.getId(), JSONUtil.toJsonStr(userInfo), RandomUtil.randomInt(10) + 30, TimeUnit.MINUTES);
     }
 
     /**
      * 基于用户id添加缓存
+     *
      * @param userId 用户id
      */
-    public void setUserCache(Long userId){
+    public void setUserCache(Long userId) {
         UserInfo userInfo = userInfoMapper.selectById(userId);
-        if (userInfo==null){
-            redisUtils.set(CacheConstant.USER.USER_LOGIN_STATE+userId,"empty_user",3,TimeUnit.MINUTES);
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
+        if (userInfo == null) {
+            //没有设置默认值 缓存穿透
+            redisUtils.set(CacheConstant.USER.USER_LOGIN_STATE + userId, UserConstant.EMPTY_USER, 3, TimeUnit.MINUTES);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
         setUserCache(userInfo);
     }
 
     /**
      * 基于用户id获取用户缓存;没有自行加载
+     *
      * @param userId 用户id
-     * @return UserDetailVO
+     * @return UserInfo 用户信息
      */
-    public UserInfo getUserDetailVOCache(Long userId){
+    public UserInfo getUserInfoCache(Long userId) {
         String jsonStr = redisUtils.get(CacheConstant.USER.USER_LOGIN_STATE + userId);
-        if (jsonStr==null){
+        if (jsonStr == null) {
             setUserCache(userId);
         }
         jsonStr = redisUtils.get(CacheConstant.USER.USER_LOGIN_STATE + userId);
-        if ("empty_user".equals(jsonStr)){
-         throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
+        if (UserConstant.EMPTY_USER.equals(jsonStr)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
         return JSONUtil.toBean(jsonStr, UserInfo.class);
     }
 
     /**
      * 删除缓存
+     *
      * @param userId 用户id
      * @return true成功 false失败
      */
-    public Boolean deleteUserCache(Long userId){
-        return redisUtils.delete(CacheConstant.USER.USER_LOGIN_STATE+userId);
+    public Boolean deleteUserCache(Long userId) {
+        return redisUtils.delete(CacheConstant.USER.USER_LOGIN_STATE + userId);
     }
 }
 

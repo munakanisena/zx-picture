@@ -6,14 +6,14 @@ import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditReques
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditResponseMessage;
 import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEditMessageTypeEnum;
 import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategy;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 错误消息策略
  * @createDate : 2025/7/17 上午11:18
  */

@@ -7,14 +7,14 @@ import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEdit
 import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategy;
 import com.katomegumi.zxpicturebackend.manager.websocket.util.PictureEditBroadcaster;
 import com.katomegumi.zxpicturebackend.manager.websocket.util.UserEditStatusManager;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 退出编辑策略
  * @createDate : 2025/7/17 上午11:21
  */

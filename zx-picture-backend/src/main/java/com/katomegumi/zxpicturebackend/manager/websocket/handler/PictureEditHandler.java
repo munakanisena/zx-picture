@@ -8,9 +8,8 @@ import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEdit
 import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategy;
 import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategyFactory;
 import com.katomegumi.zxpicturebackend.manager.websocket.util.PictureEditBroadcaster;
-import com.katomegumi.zxpicturebackend.manager.websocket.util.UserEditStatusManager;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -19,11 +18,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author Megumi
+ * @author lr
  * @description websocket  文本消息处理器
  */
 @Component

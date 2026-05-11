@@ -1,16 +1,16 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceUser;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserAddRequest;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserEditRequest;
-import com.katomegumi.zxpicturebackend.model.dto.spaceuser.SpaceUserQueryRequest;
-import com.katomegumi.zxpicturebackend.model.vo.space.user.SpaceUserVO;
+import com.katomegumi.zxpicturebackend.entity.SpaceUser;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserAddRequest;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserEditRequest;
+import com.katomegumi.zxpicturebackend.dto.spaceuser.SpaceUserQueryRequest;
+import com.katomegumi.zxpicturebackend.vo.space.user.SpaceUserVO;
 
 import java.util.List;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【space_user(团队用户关联)】的数据库操作Service
  * @createDate 2025-06-10 20:09:10
  */
@@ -59,15 +59,5 @@ public interface SpaceUserService extends IService<SpaceUser> {
      * @return 空间权限列表
      */
     List<SpaceUserVO> queryUserTeamSpacePermissions(SpaceUserQueryRequest spaceUserQueryRequest);
-
-
-    /**
-     * 校验空间用户 实体
-     *
-     * @param spaceUser 用户角色
-     * @param isAdd 是否新增
-     */
-    void validSpaceUser(SpaceUser spaceUser, Boolean isAdd);
-
 
 }

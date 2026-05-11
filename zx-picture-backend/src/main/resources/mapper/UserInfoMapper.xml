@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.katomegumi.zxpicturebackend.model.dao.mapper.UserInfoMapper">
+<mapper namespace="com.katomegumi.zxpicturebackend.mapper.UserInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo">
+    <resultMap id="BaseResultMap" type="com.katomegumi.zxpicturebackend.entity.UserInfo">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <result property="password" column="password"/>
@@ -30,7 +30,7 @@
     </sql>
 
 
-    <select id="selectMapByIds" resultType="com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo">
+    <select id="selectMapByIds" resultMap="BaseResultMap">
         SELECT * from user_info WHERE id IN
         <foreach collection="userIds" item="id" open="(" separator="," close=")">
             #{id}

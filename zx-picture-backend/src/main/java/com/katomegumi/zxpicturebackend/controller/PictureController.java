@@ -4,28 +4,29 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.GetOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.search.model.SearchPictureResult;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.req.DeleteRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaSpaceCheckPermission;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaUserCheckLogin;
-import com.katomegumi.zxpicturebackend.manager.auth.model.SpaceUserPermissionConstant;
-import com.katomegumi.zxpicturebackend.model.dto.picture.*;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionStatusEnum;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionTypeEnum;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceTypeEnum;
-import com.katomegumi.zxpicturebackend.model.vo.picture.*;
+import com.katomegumi.zxpicturebackend.limit.RateLimit;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.GetOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.search.model.SearchPictureResult;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.req.DeleteRequest;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.dto.picture.*;
+import com.katomegumi.zxpicturebackend.security.annotation.SaSpaceCheckPermission;
+import com.katomegumi.zxpicturebackend.security.annotation.SaUserCheckLogin;
+import com.katomegumi.zxpicturebackend.security.model.SpaceUserPermissionConstant;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionStatusEnum;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionTypeEnum;
+import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
 import com.katomegumi.zxpicturebackend.service.PictureService;
+import com.katomegumi.zxpicturebackend.vo.picture.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图片模块
  */
 @RestController
@@ -50,6 +51,7 @@ public class PictureController {
      * @param pictureUploadRequest 请求
      * @return 图片详情
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @PostMapping("/upload-public/file")
     @SaUserCheckLogin
     public BaseResponse<PictureDetailVO> uploadPictureByFileToPublic(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest) {
@@ -64,6 +66,7 @@ public class PictureController {
      * @param pictureUploadRequest 请求
      * @return 图片详情
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @PostMapping("/upload-public/url")
     @SaUserCheckLogin
     public BaseResponse<PictureDetailVO> uploadPictureByUrlToPublic(@RequestBody PictureUploadRequest pictureUploadRequest) {
@@ -79,6 +82,7 @@ public class PictureController {
      * @param pictureUploadRequest 请求
      * @return 图片详情
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @PostMapping("/upload-space/file")
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
     public BaseResponse<PictureDetailVO> uploadPictureByFileToSpace(@RequestPart("file") MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest) {
@@ -207,7 +211,7 @@ public class PictureController {
      * 颜色搜索(目前仅支持自己的空间)
      *
      * @param searchPictureByColorRequest 搜索请求
-     * @return
+     * @return 搜索结果
      */
     @PostMapping("/search/color")
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_VIEW)
@@ -224,6 +228,7 @@ public class PictureController {
      * @param searchPictureByPictureRequest 搜索请求
      * @return 搜索结果
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @SaUserCheckLogin
     @PostMapping("/search/by-picture")
     public BaseResponse<List<SearchPictureResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
@@ -290,6 +295,7 @@ public class PictureController {
      * @param capturePictureRequest 爬取请求
      * @return 爬取的结果
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @PostMapping("/capture")
     public BaseResponse<List<CapturePictureResult>> capturePicture(@RequestBody capturePictureRequest capturePictureRequest) {
         ThrowUtils.throwIf(capturePictureRequest == null, ErrorCode.PARAMS_ERROR);
@@ -304,6 +310,7 @@ public class PictureController {
      * @param pictureUploadRequest 上传请求
      * @return 上传结果
      */
+    @RateLimit(type = RateLimit.LimitType.USER)
     @SaUserCheckLogin
     @PostMapping("/upload/capture")
     public BaseResponse<Boolean> uploadPictureByCapture(@RequestBody PictureUploadRequest pictureUploadRequest) {

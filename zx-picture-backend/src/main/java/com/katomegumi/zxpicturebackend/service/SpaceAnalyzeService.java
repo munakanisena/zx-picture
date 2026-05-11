@@ -1,15 +1,15 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo;
-import com.katomegumi.zxpicturebackend.model.dto.space.analyze.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.analyze.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceVO;
+import com.katomegumi.zxpicturebackend.dto.space.analyze.*;
+import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
+import com.katomegumi.zxpicturebackend.vo.space.analyze.*;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceVO;
 
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图库分析接口
  */
 public interface SpaceAnalyzeService extends IService<SpaceInfo> {

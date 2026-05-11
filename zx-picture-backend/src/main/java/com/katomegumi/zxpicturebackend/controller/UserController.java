@@ -3,30 +3,30 @@ package com.katomegumi.zxpicturebackend.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.req.DeleteRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaUserCheckLogin;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.req.DeleteRequest;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.dto.user.*;
+import com.katomegumi.zxpicturebackend.limit.RateLimit;
 import com.katomegumi.zxpicturebackend.manager.email.model.EmailRequest;
-import com.katomegumi.zxpicturebackend.model.dto.user.*;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserVO;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
+import com.katomegumi.zxpicturebackend.security.annotation.SaUserCheckLogin;
 import com.katomegumi.zxpicturebackend.service.UserService;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.vo.user.UserVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
 /**
- * @author Megumi
+ * @author lr
  */
 @RestController
 @RequestMapping(ApiRouterConstant.API_USER_URL_PREFIX)
@@ -41,6 +41,7 @@ public class UserController {
      * @param emailRequest 邮件请求
      * @return 发送结果
      */
+    @RateLimit(limit = 5)
     @PostMapping("/captcha")
     public BaseResponse<Boolean> sendRegisterCaptcha(@RequestBody EmailRequest emailRequest) {
         ThrowUtils.throwIf(emailRequest == null, ErrorCode.PARAMS_ERROR);
@@ -56,11 +57,10 @@ public class UserController {
      * @param userRegisterRequest 用户注册信息
      * @return 注册结果
      */
+    @RateLimit(limit = 5)
     @PostMapping("/register")
     public BaseResponse<Boolean> register(@RequestBody UserRegisterRequest userRegisterRequest) {
-
         ThrowUtils.throwIf(userRegisterRequest == null, ErrorCode.PARAMS_ERROR);
-
         String username = userRegisterRequest.getName();
         String userEmail = userRegisterRequest.getEmail();
         String captcha = userRegisterRequest.getCaptcha();
@@ -70,9 +70,7 @@ public class UserController {
         if (StrUtil.hasBlank(username, userPassword, confirmPassword, userEmail, captcha)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-
         userService.register(userRegisterRequest);
-
         return ResultUtils.success();
     }
 
@@ -82,24 +80,22 @@ public class UserController {
      * @param userLoginRequest 用户登录请求
      * @return 用户详情
      */
+    @RateLimit(limit = 5)
     @PostMapping("/login")
     public BaseResponse<UserDetailVO> login(@RequestBody UserLoginRequest userLoginRequest) {
         ThrowUtils.throwIf(userLoginRequest == null, ErrorCode.PARAMS_ERROR);
-
         String emailOrUsername = userLoginRequest.getEmailOrUsername();
         String password = userLoginRequest.getPassword();
         ThrowUtils.throwIf(StrUtil.hasBlank(emailOrUsername, password), ErrorCode.PARAMS_ERROR, "参数为空");
-
-        UserDetailVO loginUserDetailVO = userService.login(userLoginRequest);
-        return ResultUtils.success(loginUserDetailVO);
+        return ResultUtils.success(userService.login(userLoginRequest));
     }
 
     /**
      * 密码重置 1
      *
      * @param emailRequest 邮箱地址
-     * @return
      */
+    @RateLimit(limit = 5)
     @PostMapping("/forgot/one")
     public BaseResponse<Boolean> forgotPassword(@RequestBody EmailRequest emailRequest) {
         ThrowUtils.throwIf(emailRequest == null, ErrorCode.PARAMS_ERROR);
@@ -114,6 +110,7 @@ public class UserController {
      * @param userResetPasswordRequest 密码重置请求
      * @return 更新结果
      */
+    @RateLimit(limit = 5)
     @PostMapping("/forgot/two")
     public BaseResponse<Boolean> restPassword(@RequestBody UserResetPasswordRequest userResetPasswordRequest) {
         ThrowUtils.throwIf(userResetPasswordRequest == null, ErrorCode.PARAMS_ERROR);
@@ -149,9 +146,6 @@ public class UserController {
     @SaUserCheckLogin
     @GetMapping("/loginDetail")
     public BaseResponse<UserDetailVO> getLoginUserDetail() {
-        if (!StpKit.USER.isLogin()) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
         return ResultUtils.success(userService.getLoginUserDetail());
     }
 
@@ -165,9 +159,6 @@ public class UserController {
     @SaUserCheckLogin
     @PostMapping("/edit")
     public BaseResponse<Boolean> editUserInfo(@RequestBody UserEditRequest userEditRequest) {
-        if (!StpKit.USER.isLogin()) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
         ThrowUtils.throwIf(userEditRequest == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(userEditRequest.getId() == null || userEditRequest.getId() < 0, ErrorCode.PARAMS_ERROR, "用户id错误");
         String userIntroduction = userEditRequest.getIntroduction();
@@ -184,6 +175,7 @@ public class UserController {
      * @param avatarFile 头像文件
      * @return 头像地址
      */
+    @RateLimit(limit = 5)
     @SaUserCheckLogin
     @PostMapping("/upload-avatar")
     public BaseResponse<String> uploadAvatar(@RequestParam("file") MultipartFile avatarFile) {

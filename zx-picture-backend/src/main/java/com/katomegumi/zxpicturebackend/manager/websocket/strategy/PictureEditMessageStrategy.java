@@ -1,11 +1,11 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.strategy;
 
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description :  策略模式接口
  * @createDate : 2025/7/17 上午10:38
  */

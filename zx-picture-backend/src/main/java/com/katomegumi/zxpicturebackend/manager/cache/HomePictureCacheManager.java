@@ -5,27 +5,24 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.PictureInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.UserInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.katomegumi.zxpicturebackend.model.vo.picture.PictureHomeVO;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.mapper.PictureInfoMapper;
+import com.katomegumi.zxpicturebackend.mapper.UserInfoMapper;
+import com.katomegumi.zxpicturebackend.dto.picture.PictureQueryRequest;
+import com.katomegumi.zxpicturebackend.vo.picture.PictureHomeVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 首页图片 缓存管理类
  * @createDate : 2025/5/28 下午5:28
  */
@@ -67,7 +64,6 @@ public class HomePictureCacheManager {
             //获取用户信息
             Set<Long> userIds = picturePage.getRecords().stream().map(PictureInfo::getUserId).collect(Collectors.toSet());
             Map<Long, UserInfo> userInfoMap = userInfoMapper.selectMapByIds(userIds);
-
             //补充作者信息
             pictureHomeVOPageVO.getRecords().forEach(p -> {
                 Long userId = p.getUserId();

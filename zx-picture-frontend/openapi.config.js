@@ -2,9 +2,9 @@
 import { generateService } from '@umijs/openapi'
 
 generateService({
-  requestLibPath: "import request from '@/utils/request'",
+  requestLibPath: "import request from '@/services/http/request'",
   schemaPath: 'http://localhost:8123/api/v2/api-docs?group=group_1',
-  serversPath: './src',
+  serversPath: './src/services',
   //设置响应直接为数据
   dataFields: ['data'],
 })

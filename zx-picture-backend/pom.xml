@@ -41,7 +41,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <!--数据库操作:https://baomidou.com/-->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -64,14 +63,12 @@
             <artifactId>shardingsphere-jdbc-core-spring-boot-starter</artifactId>
             <version>5.2.0</version>
         </dependency>
-
         <!-- 腾讯云 cos 服务 -->
         <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>cos_api</artifactId>
             <version>5.6.227</version>
         </dependency>
-
         <!-- Redis 操作-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -88,7 +85,6 @@
 <!--            <groupId>org.springframework.session</groupId>-->
 <!--            <artifactId>spring-session-data-redis</artifactId>-->
 <!--        </dependency>-->
-
         <!-- Sa-Token 权限认证 -->
         <dependency>
             <groupId>cn.dev33</groupId>
@@ -106,7 +102,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
-
         <!-- websocket 协同编辑-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -118,7 +113,6 @@
             <artifactId>disruptor</artifactId>
             <version>3.4.2</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -141,12 +135,6 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
-        </dependency>
-        <!-- Bucket4j 是一个基于令牌桶算法的 Java 限流库 https://bucket4j.com/8.14.0/toc.html#about-bucket4j -->
-        <dependency>
-            <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j_jdk11-core</artifactId>
-            <version>8.14.0</version>
         </dependency>
         <!--接口文档:https://doc.xiaominfo.com/docs/quick-start#spring-boot-2-->
         <dependency>

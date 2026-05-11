@@ -1,22 +1,22 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceActiveRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceEditRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceQueryRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceUpdateRequest;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceTeamDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceVO;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceActiveRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceEditRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceQueryRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceUpdateRequest;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceTeamDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceVO;
 
 import java.util.List;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【space_info(空间信息表)】的数据库操作Service
  * @createDate 2025-06-10 20:09:10
  */

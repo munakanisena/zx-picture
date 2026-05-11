@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图片编辑请求消息
  */
 @Data

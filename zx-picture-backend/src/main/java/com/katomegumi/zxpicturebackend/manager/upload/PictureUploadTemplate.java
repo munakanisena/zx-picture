@@ -6,9 +6,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.config.CosClientConfig;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.config.CosClientConfig;
 import com.katomegumi.zxpicturebackend.manager.cos.CosManager;
 import com.katomegumi.zxpicturebackend.manager.upload.modal.UploadPictureResult;
 import com.qcloud.cos.model.PutObjectResult;
@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description java设计模版模式(图片上传)
  */
 @Slf4j

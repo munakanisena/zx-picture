@@ -1,37 +1,40 @@
 package com.katomegumi.zxpicturebackend.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.util.SFunctionUtils;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureCategory;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.PictureCategoryMapper;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryAddRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryQueryRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryUpdateRequest;
-import com.katomegumi.zxpicturebackend.model.vo.category.CategoryVO;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.common.constant.PictureConstant;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.SFunctionUtils;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryAddRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryQueryRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryUpdateRequest;
+import com.katomegumi.zxpicturebackend.entity.PictureCategory;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.mapper.PictureCategoryMapper;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
 import com.katomegumi.zxpicturebackend.service.PictureCategoryService;
+import com.katomegumi.zxpicturebackend.vo.category.CategoryVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_category(分类表)】的数据库操作Service实现
  * @createDate 2025-05-27 20:15:27
  */
@@ -42,18 +45,49 @@ public class PictureCategoryServiceImpl extends ServiceImpl<PictureCategoryMappe
 
     private final PictureCategoryMapper pictureCategoryMapper;
 
+    private final CacheManager cacheManager;
+
     @Override
     public void addCategory(CategoryAddRequest categoryAddRequest) {
         PictureCategory pictureCategory = BeanUtil.copyProperties(categoryAddRequest, PictureCategory.class);
         pictureCategory.setUserId(StpKit.USER.getLoginIdAsLong());
         boolean result = this.save(pictureCategory);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "添加失败");
+        //如果添加的是父分类 需要删除缓存
+        if (categoryAddRequest.getParentId() == PictureConstant.PICTURE_CATEGORY_ROOT_PARENT_ID) {
+            Cache cache = cacheManager.getCache(CacheConstant.HOME_CATEGORY_CACHE_NAME);
+            if (cache != null) {
+                cache.clear();
+            }
+        }
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long categoryId) {
-        boolean result = this.removeById(categoryId);
+        PictureCategory pictureCategory = this.getById(categoryId);
+        ThrowUtils.throwIf(pictureCategory == null, ErrorCode.NOT_FOUND_ERROR, "分类不存在");
+        List<Long> categoryIds = new ArrayList<>();
+        categoryIds.add(categoryId);
+        //如果删除的是父分类 子分类也需要删除
+        if (pictureCategory.getParentId() == PictureConstant.PICTURE_CATEGORY_ROOT_PARENT_ID) {
+            List<PictureCategory> pictureCategoryList = lambdaQuery().eq(PictureCategory::getParentId, categoryId).select(PictureCategory::getId).list();
+            if (CollUtil.isNotEmpty(pictureCategoryList)) {
+                pictureCategoryList.forEach(p -> {
+                    Long id = p.getId();
+                    if (id != null) {
+                        categoryIds.add(p.getId());
+                    }
+                });
+            }
+        }
+        boolean result = this.removeByIds(categoryIds);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除失败");
+        pictureCategoryMapper.updatePictureCategoryIdToNull(categoryIds);
+        Cache cache = cacheManager.getCache(CacheConstant.HOME_CATEGORY_CACHE_NAME);
+        if (cache != null) {
+            cache.clear();
+        }
     }
 
     @Override

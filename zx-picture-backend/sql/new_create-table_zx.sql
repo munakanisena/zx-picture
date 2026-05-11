@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS user_info
     password     varchar(100)        NOT NULL COMMENT '密码',
     email        varchar(50)         NOT NULL COMMENT '用户邮箱',
     phone        varchar(15)                  DEFAULT NULL COMMENT '用户手机号',
-    avatar       varchar(512)                 DEFAULT NULL COMMENT '用户头像',
+    avatar       varchar(512)        NOT NULL DEFAULT NULL COMMENT '用户头像',
     introduction varchar(512)                 DEFAULT NULL COMMENT '用户简介',
-    role         varchar(20)                  DEFAULT 'user' COMMENT '用户角色（USER-普通用户, ADMIN-管理员）',
+    role         varchar(20)         NOT NULL DEFAULT 'user' COMMENT '用户角色（USER-普通用户, ADMIN-管理员）',
     vip_number   bigint unsigned              DEFAULT NULL COMMENT '会员编号',
     is_vip       tinyint(3) unsigned          DEFAULT 0 COMMENT '是否为会员;0-否 1-是',
     is_disabled  tinyint(3) unsigned NOT NULL DEFAULT 0 COMMENT '是否禁用（0-正常, 1-禁用）',
@@ -86,13 +86,13 @@ CREATE TABLE IF NOT EXISTS picture_info
     update_time      datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id),
     UNIQUE KEY pk_id (id),
-    INDEX idx_pic_name (pic_name),          -- 提升基于图片名称的查询性能
-    INDEX idx_pic_desc (pic_desc),          -- 用于模糊搜索图片简介
-    INDEX idx_category_id (category_id),    -- 提升基于分类的查询性能
-    INDEX idx_tags (tags),                  -- 提升基于标签的查询性能
-    INDEX idx_user_id (user_id),            -- 提升基于用户 ID 的查询性能
-    INDEX idx_space_id (space_id),          -- 提升基于空间 ID 的查询性能
-    INDEX idx_review_status (review_status) -- 提升基于审核状态的查询性能
+    INDEX idx_pic_name (pic_name),       -- 提升基于图片名称的查询性能
+    INDEX idx_pic_desc (pic_desc),       -- 用于模糊搜索图片简介
+    INDEX idx_category_id (category_id), -- 提升基于分类的查询性能
+    INDEX idx_tags (tags),               -- 提升基于标签的查询性能
+    INDEX idx_user_id (user_id),         -- 提升基于用户 ID 的查询性能
+    INDEX idx_space_id (space_id)        -- 提升基于空间 ID 的查询性能
+#     INDEX idx_review_status (review_status) -- 提升基于审核状态的查询性能
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT = '图片信息表';
@@ -167,12 +167,12 @@ CREATE TABLE IF NOT EXISTS space_info
 CREATE TABLE IF NOT EXISTS space_user
 (
     id          bigint unsigned AUTO_INCREMENT COMMENT '主键ID',
-    space_id    bigint unsigned     NOT NULL COMMENT '空间ID',
-    user_id     bigint unsigned     NOT NULL COMMENT '用户ID',
-    space_role  varchar(24)                  DEFAULT 'viewer' NULL COMMENT '空间角色(viewer-访问,editor-编辑,admin-管理)',
-    edit_time   datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '编辑时间',
-    create_time datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    space_id    bigint unsigned NOT NULL COMMENT '空间ID',
+    user_id     bigint unsigned NOT NULL COMMENT '用户ID',
+    space_role  varchar(24)              DEFAULT 'viewer' NULL COMMENT '空间角色(viewer-访问,editor-编辑,admin-管理)',
+    edit_time   datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '编辑时间',
+    create_time datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time datetime        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id),
     UNIQUE KEY pk_id (id),
     UNIQUE KEY uk_space_id_user_id (space_id, user_id), -- 唯一索引，用户在一个空间中只能有一个角色

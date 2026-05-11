@@ -1,9 +1,9 @@
 package com.katomegumi.zxpicturebackend.manager.sharding;
 
 import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceLevelEnum;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceTypeEnum;
+import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
+import com.katomegumi.zxpicturebackend.enums.SpaceLevelEnum;
+import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
 import com.katomegumi.zxpicturebackend.service.SpaceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.driver.jdbc.core.connection.ShardingSphereConnection;
@@ -12,6 +12,7 @@ import org.apache.shardingsphere.mode.manager.ContextManager;
 import org.apache.shardingsphere.sharding.api.config.ShardingRuleConfiguration;
 import org.apache.shardingsphere.sharding.api.config.rule.ShardingTableRuleConfiguration;
 import org.apache.shardingsphere.sharding.rule.ShardingRule;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -25,8 +26,10 @@ import java.util.stream.Collectors;
 
 /**
  * 动态的获取分表的范围 也就是在启动后 修改了配置
+ *
+ * @author lr
  */
-//@Component
+@Component
 @Slf4j
 public class DynamicShardingManager {
 
@@ -48,15 +51,8 @@ public class DynamicShardingManager {
      */
     private Set<String> fetchAllPictureTableNames() {
         // 为了测试方便，直接对所有团队空间分表（实际上线改为仅对旗舰版生效）
-        Set<Long> spaceIds = spaceServiceOld.lambdaQuery()
-                .eq(SpaceInfo::getSpaceType, SpaceTypeEnum.TEAM.getKey())
-                .list()
-                .stream()
-                .map(SpaceInfo::getId)
-                .collect(Collectors.toSet());
-        Set<String> tableNames = spaceIds.stream()
-                .map(spaceId -> LOGIC_TABLE_NAME + "_" + spaceId)
-                .collect(Collectors.toSet());
+        Set<Long> spaceIds = spaceServiceOld.lambdaQuery().eq(SpaceInfo::getSpaceType, SpaceTypeEnum.TEAM.getKey()).list().stream().map(SpaceInfo::getId).collect(Collectors.toSet());
+        Set<String> tableNames = spaceIds.stream().map(spaceId -> LOGIC_TABLE_NAME + "_" + spaceId).collect(Collectors.toSet());
         tableNames.add(LOGIC_TABLE_NAME); // 添加初始逻辑表
         return tableNames;
     }
@@ -66,35 +62,27 @@ public class DynamicShardingManager {
      */
     private void updateShardingTableNodes() {
         Set<String> tableNames = fetchAllPictureTableNames();
-        String newActualDataNodes = tableNames.stream()
-                .map(tableName -> "zx_picture." + tableName) // 确保前缀合法
+        String newActualDataNodes = tableNames.stream().map(tableName -> "zx_picture." + tableName) // 确保前缀合法
                 .collect(Collectors.joining(","));
         log.info("动态分表 actual-data-nodes 配置: {}", newActualDataNodes);
 
         ContextManager contextManager = getContextManager();
-        ShardingSphereRuleMetaData ruleMetaData = contextManager.getMetaDataContexts()
-                .getMetaData()
-                .getDatabases()
-                .get(DATABASE_NAME)
-                .getRuleMetaData();
+        ShardingSphereRuleMetaData ruleMetaData = contextManager.getMetaDataContexts().getMetaData().getDatabases().get(DATABASE_NAME).getRuleMetaData();
 
         Optional<ShardingRule> shardingRule = ruleMetaData.findSingleRule(ShardingRule.class);
         if (shardingRule.isPresent()) {
             ShardingRuleConfiguration ruleConfig = (ShardingRuleConfiguration) shardingRule.get().getConfiguration();
-            List<ShardingTableRuleConfiguration> updatedRules = ruleConfig.getTables()
-                    .stream()
-                    .map(oldTableRule -> {
-                        if (LOGIC_TABLE_NAME.equals(oldTableRule.getLogicTable())) {
-                            ShardingTableRuleConfiguration newTableRuleConfig = new ShardingTableRuleConfiguration(LOGIC_TABLE_NAME, newActualDataNodes);
-                            newTableRuleConfig.setDatabaseShardingStrategy(oldTableRule.getDatabaseShardingStrategy());
-                            newTableRuleConfig.setTableShardingStrategy(oldTableRule.getTableShardingStrategy());
-                            newTableRuleConfig.setKeyGenerateStrategy(oldTableRule.getKeyGenerateStrategy());
-                            newTableRuleConfig.setAuditStrategy(oldTableRule.getAuditStrategy());
-                            return newTableRuleConfig;
-                        }
-                        return oldTableRule;
-                    })
-                    .collect(Collectors.toList());
+            List<ShardingTableRuleConfiguration> updatedRules = ruleConfig.getTables().stream().map(oldTableRule -> {
+                if (LOGIC_TABLE_NAME.equals(oldTableRule.getLogicTable())) {
+                    ShardingTableRuleConfiguration newTableRuleConfig = new ShardingTableRuleConfiguration(LOGIC_TABLE_NAME, newActualDataNodes);
+                    newTableRuleConfig.setDatabaseShardingStrategy(oldTableRule.getDatabaseShardingStrategy());
+                    newTableRuleConfig.setTableShardingStrategy(oldTableRule.getTableShardingStrategy());
+                    newTableRuleConfig.setKeyGenerateStrategy(oldTableRule.getKeyGenerateStrategy());
+                    newTableRuleConfig.setAuditStrategy(oldTableRule.getAuditStrategy());
+                    return newTableRuleConfig;
+                }
+                return oldTableRule;
+            }).collect(Collectors.toList());
             ruleConfig.setTables(updatedRules);
             contextManager.alterRuleConfiguration(DATABASE_NAME, Collections.singleton(ruleConfig));
             contextManager.reloadDatabase(DATABASE_NAME);
@@ -105,7 +93,7 @@ public class DynamicShardingManager {
     }
 
     public void createTable(SpaceInfo space) {
-        if (space.getSpaceType() == SpaceTypeEnum.TEAM.getKey() && space.getSpaceLevel() == SpaceLevelEnum.FLAGSHIP.getKey()) {
+        if (space.getSpaceType().equals(SpaceTypeEnum.TEAM.getKey()) && space.getSpaceLevel() == SpaceLevelEnum.FLAGSHIP.getKey()) {
             String tableName = LOGIC_TABLE_NAME + "_" + space.getId();
             //建表语句
             String createSql = "create table " + tableName + " LIKE tb_picture";

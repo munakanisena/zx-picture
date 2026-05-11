@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.katomegumi.zxpicturebackend.model.dao.mapper.SpaceInfoMapper">
+<mapper namespace="com.katomegumi.zxpicturebackend.mapper.SpaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo">
+    <resultMap id="BaseResultMap" type="com.katomegumi.zxpicturebackend.entity.SpaceInfo">
             <id property="id" column="id" />
             <result property="userId" column="user_id" />
             <result property="spaceName" column="space_name" />

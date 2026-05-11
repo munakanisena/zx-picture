@@ -10,42 +10,42 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.BaiLianApi;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.CreateOutPaintingTaskRequest;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.CreateOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.aliyunai.model.GetOutPaintingTaskResponse;
-import com.katomegumi.zxpicturebackend.core.api.capture.CapturePictureManager;
-import com.katomegumi.zxpicturebackend.core.api.search.ImageSearchApiFacade;
-import com.katomegumi.zxpicturebackend.core.api.search.model.SearchPictureResult;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.core.constant.PictureConstant;
-import com.katomegumi.zxpicturebackend.core.util.ColorSimilarUtils;
-import com.katomegumi.zxpicturebackend.core.util.SFunctionUtils;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
-import com.katomegumi.zxpicturebackend.manager.task.AsyncFileTaskHandler;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.BaiLianApi;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.CreateOutPaintingTaskRequest;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.CreateOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.aliyunai.model.GetOutPaintingTaskResponse;
+import com.katomegumi.zxpicturebackend.common.api.capture.CapturePictureManager;
+import com.katomegumi.zxpicturebackend.common.api.search.ImageSearchApiFacade;
+import com.katomegumi.zxpicturebackend.common.api.search.model.SearchPictureResult;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.common.constant.PictureConstant;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.ColorSimilarUtils;
+import com.katomegumi.zxpicturebackend.common.util.RedisUtils;
+import com.katomegumi.zxpicturebackend.common.util.SFunctionUtils;
+import com.katomegumi.zxpicturebackend.dto.picture.*;
+import com.katomegumi.zxpicturebackend.entity.*;
+import com.katomegumi.zxpicturebackend.enums.*;
 import com.katomegumi.zxpicturebackend.manager.upload.PictureFileUpload;
 import com.katomegumi.zxpicturebackend.manager.upload.PictureUploadTemplate;
 import com.katomegumi.zxpicturebackend.manager.upload.PictureUrlUpload;
 import com.katomegumi.zxpicturebackend.manager.upload.modal.UploadPictureResult;
-import com.katomegumi.zxpicturebackend.model.dao.entity.*;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.PictureInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.UserInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dto.picture.*;
-import com.katomegumi.zxpicturebackend.model.enums.*;
-import com.katomegumi.zxpicturebackend.model.vo.picture.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceTeamDetailVO;
+import com.katomegumi.zxpicturebackend.mapper.PictureInfoMapper;
+import com.katomegumi.zxpicturebackend.mapper.UserInfoMapper;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
 import com.katomegumi.zxpicturebackend.service.*;
+import com.katomegumi.zxpicturebackend.task.AsyncFileTaskHandler;
+import com.katomegumi.zxpicturebackend.vo.picture.*;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceTeamDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_info(图片信息表)】的数据库操作Service实现
  * @createDate 2025-05-24 14:26:44
  */
@@ -91,7 +91,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
 
     private final BaiLianApi baiLianApi;
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisUtils redisUtils;
 
     @Override
     public PictureDetailVO uploadPicture(Object pictureInputSource, PictureUploadRequest pictureUploadRequest) {
@@ -382,9 +382,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
         //4.保存图片名称
         AtomicInteger count = new AtomicInteger(1);
         String finalNamePrefix = namePrefix;
-        capturePictureResults.forEach(capturePictureResult -> {
-            capturePictureResult.setPictureName(String.format("%s_%d", finalNamePrefix, count.getAndIncrement()));
-        });
+        capturePictureResults.forEach(capturePictureResult -> capturePictureResult.setPictureName(String.format("%s_%d", finalNamePrefix, count.getAndIncrement())));
 
         return capturePictureResults;
     }
@@ -440,9 +438,6 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
 
     @Override
     public void likeOrCollection(PictureInteractionRequest pictureInteractionRequest) {
-        if (!StpKit.USER.isLogin()) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
         Long pictureId = pictureInteractionRequest.getId();
         //图片是否存在
         existPictureById(pictureId);
@@ -452,7 +447,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
         //修改互动数据 存入redis
         Integer interactionType = pictureInteractionRequest.getInteractionType();
         //通过定时任务同步 到数据库
-        stringRedisTemplate.opsForHash().increment(PictureInteractionTypeEnum.LIKE.getKey().equals(interactionType) ? CacheConstant.PICTURE.PICTURE_INTERACTION_LIKE_KEY_PREFIX : CacheConstant.PICTURE.PICTURE_INTERACTION_COLLECTION_KEY_PREFIX, pictureId.toString(), PictureInteractionStatusEnum.isInteracted(pictureInteractionRequest.getInteractionStatus()) ? 1 : -1);
+        redisUtils.opsHash().increment(PictureInteractionTypeEnum.LIKE.getKey().equals(interactionType) ? CacheConstant.PICTURE.PICTURE_INTERACTION_LIKE_KEY_PREFIX : CacheConstant.PICTURE.PICTURE_INTERACTION_COLLECTION_KEY_PREFIX, pictureId.toString(), PictureInteractionStatusEnum.isInteracted(pictureInteractionRequest.getInteractionStatus()) ? 1 : -1);
     }
 
     @Override
@@ -462,8 +457,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
         ThrowUtils.throwIf(pictureInfo == null, ErrorCode.OPERATION_ERROR, "图片不存在");
         CreateOutPaintingTaskRequest.Parameters parameters = pictureExtendRequest.getParameters();
         ThrowUtils.throwIf(parameters == null, ErrorCode.OPERATION_ERROR, "扩图参数为空");
+        //校验图片是否符合扩哭要求
+        baiLianApi.validatePictureInfo(pictureInfo);
         //使用redis 限制用户一天一次
-        BoundSetOperations<String, String> setOperations = stringRedisTemplate.boundSetOps(CacheConstant.PICTURE.PICTURE_EXTEND_PREFIX);
+        BoundSetOperations<String, String> setOperations = redisUtils.boundSetOperations(CacheConstant.PICTURE.PICTURE_EXTEND_PREFIX);
         Long userId = StpKit.USER.getLoginIdAsLong();
         if (Boolean.TRUE.equals(setOperations.isMember(userId.toString()))) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "一天只能扩图一次");
@@ -473,6 +470,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
         long seconds = Math.max(0, DateUtil.between(now, DateUtil.endOfDay(now), DateUnit.SECOND));
         setOperations.add(userId.toString());
         setOperations.expire(seconds, TimeUnit.SECONDS);
+
         CreateOutPaintingTaskRequest createOutPaintingTaskRequest = new CreateOutPaintingTaskRequest();
         createOutPaintingTaskRequest.setParameters(parameters);
         createOutPaintingTaskRequest.setInput(new CreateOutPaintingTaskRequest.Input(pictureInfo.getOriginUrl()));
@@ -624,23 +622,18 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
 
     @Override
     public Map<Long, Integer> getRedisDeltas(String redisKey, List<Long> pictureIds) {
-        // 将Long类型的ID转换为Object类型（Redis需要的key格式）
-        List<Object> keys = pictureIds.stream().map(String::valueOf).collect(Collectors.toList());
-
+        List<String> keys = pictureIds.stream().map(String::valueOf).collect(Collectors.toList());
         // 批量获取Redis中的变化量
-        List<Object> values = stringRedisTemplate.opsForHash().multiGet(redisKey, keys);
-
+        List<Object> values = redisUtils.opsHash().multiGet(redisKey, keys);
         if (CollUtil.isEmpty(values)) {
             return Collections.emptyMap();
         }
-
         // 构建ID到变化量的映射
         Map<Long, Integer> result = new HashMap<>();
         for (int i = 0; i < pictureIds.size(); i++) {
             Long id = pictureIds.get(i);
             Object value = values.get(i);
             int delta = 0;
-
             if (value != null) {
                 try {
                     delta = Integer.parseInt(value.toString());
@@ -648,10 +641,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureInfoMapper, PictureIn
                     log.error("解析Redis变化量失败: key={}, value={}", redisKey, value, e);
                 }
             }
-
             result.put(id, delta);
         }
-
         return result;
     }
 

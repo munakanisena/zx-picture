@@ -1,12 +1,12 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.model;
 
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图片编辑响应消息
  */
 @Data

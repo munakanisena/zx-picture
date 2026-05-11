@@ -1,8 +1,8 @@
 package com.katomegumi.zxpicturebackend.manager.upload;
 
 import cn.hutool.core.io.FileUtil;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * 图片上传
  */
 @Service

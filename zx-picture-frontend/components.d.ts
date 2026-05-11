@@ -8,8 +8,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    BDrawerLeft: typeof import('./src/components/BDrawerLeft.vue')['default']
-    BPictureCropper: typeof import('./src/components/BPictureCropper.vue')['default']
     NA: typeof import('naive-ui')['NA']
     NAvatar: typeof import('naive-ui')['NAvatar']
     NBackTop: typeof import('naive-ui')['NBackTop']
@@ -28,6 +26,7 @@ declare module 'vue' {
     NDrawer: typeof import('naive-ui')['NDrawer']
     NDrawerContent: typeof import('naive-ui')['NDrawerContent']
     NDropdown: typeof import('naive-ui')['NDropdown']
+    NEllipsis: typeof import('naive-ui')['NEllipsis']
     NEmpty: typeof import('naive-ui')['NEmpty']
     NFlex: typeof import('naive-ui')['NFlex']
     NForm: typeof import('naive-ui')['NForm']
@@ -62,7 +61,6 @@ declare module 'vue' {
     NQrCode: typeof import('naive-ui')['NQrCode']
     NResult: typeof import('naive-ui')['NResult']
     NSelect: typeof import('naive-ui')['NSelect']
-    NSkeleton: typeof import('naive-ui')['NSkeleton']
     NSpace: typeof import('naive-ui')['NSpace']
     NSpin: typeof import('naive-ui')['NSpin']
     NStatistic: typeof import('naive-ui')['NStatistic']

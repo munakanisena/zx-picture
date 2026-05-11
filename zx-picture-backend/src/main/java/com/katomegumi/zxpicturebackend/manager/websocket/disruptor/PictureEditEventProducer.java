@@ -1,7 +1,7 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.disruptor;
 
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,11 @@ import org.springframework.web.socket.WebSocketSession;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
-//生产者
+/**
+ * 生产者
+ *
+ * @author lir
+ */
 @Component
 @Slf4j
 public class PictureEditEventProducer {

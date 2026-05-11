@@ -6,9 +6,9 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,6 +17,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author lr
+ */
 @Service
 public class PictureUrlUpload extends PictureUploadTemplate {
     @Override

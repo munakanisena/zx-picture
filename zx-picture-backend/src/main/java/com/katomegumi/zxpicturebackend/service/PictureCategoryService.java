@@ -1,19 +1,19 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureCategory;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryAddRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryQueryRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryUpdateRequest;
-import com.katomegumi.zxpicturebackend.model.vo.category.CategoryVO;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.entity.PictureCategory;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryAddRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryQueryRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryUpdateRequest;
+import com.katomegumi.zxpicturebackend.vo.category.CategoryVO;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_category(分类表)】的数据库操作Service
  * @createDate 2025-05-27 20:15:28
  */

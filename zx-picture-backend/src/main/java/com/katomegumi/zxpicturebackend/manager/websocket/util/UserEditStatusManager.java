@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 用户编辑状态管理器
  * @createDate : 2025/7/17 上午10:49
  */

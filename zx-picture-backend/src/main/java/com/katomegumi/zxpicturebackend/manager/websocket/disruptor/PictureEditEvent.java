@@ -1,12 +1,14 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.disruptor;
 
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
 import lombok.Data;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
  * 队列消息事件
+ *
+ * @author lr
  */
 @Data
 public class PictureEditEvent {

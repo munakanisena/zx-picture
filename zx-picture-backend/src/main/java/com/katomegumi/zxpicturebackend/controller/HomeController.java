@@ -1,14 +1,15 @@
 package com.katomegumi.zxpicturebackend.controller;
 
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.katomegumi.zxpicturebackend.model.vo.category.CategoryVO;
-import com.katomegumi.zxpicturebackend.model.vo.picture.PictureHomeVO;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.dto.picture.PictureQueryRequest;
+import com.katomegumi.zxpicturebackend.limit.RateLimit;
+import com.katomegumi.zxpicturebackend.vo.category.CategoryVO;
+import com.katomegumi.zxpicturebackend.vo.picture.PictureHomeVO;
 import com.katomegumi.zxpicturebackend.service.HomeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ import java.util.List;
 
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 首页模块
  * @createDate : 2025/5/28 下午1:16
  */
@@ -28,12 +29,14 @@ public class HomeController {
 
     private final HomeService homeService;
 
+
     /**
      * 获取首页图片
      *
      * @param pictureQueryRequest 查询参数
      * @return 图片列表
      */
+    @RateLimit(limit = 120)
     @PostMapping("/pictures")
     public BaseResponse<PageVO<PictureHomeVO>> pageHomePictures(@RequestBody PictureQueryRequest pictureQueryRequest) {
         ThrowUtils.throwIf(pictureQueryRequest == null, ErrorCode.PARAMS_ERROR);

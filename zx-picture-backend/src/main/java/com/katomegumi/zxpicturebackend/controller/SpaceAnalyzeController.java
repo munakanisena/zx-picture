@@ -1,23 +1,23 @@
 package com.katomegumi.zxpicturebackend.controller;
 
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.model.dto.space.analyze.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.analyze.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceVO;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.dto.space.analyze.*;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
 import com.katomegumi.zxpicturebackend.service.SpaceAnalyzeService;
+import com.katomegumi.zxpicturebackend.vo.space.analyze.*;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图库分析接口(仅管理员分析)
  */
 @RestController

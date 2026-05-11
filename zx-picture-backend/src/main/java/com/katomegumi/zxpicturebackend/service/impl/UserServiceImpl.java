@@ -5,33 +5,35 @@ import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.core.util.EmailUtils;
-import com.katomegumi.zxpicturebackend.core.util.SFunctionUtils;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.EmailUtils;
+import com.katomegumi.zxpicturebackend.common.util.SFunctionUtils;
+import com.katomegumi.zxpicturebackend.dto.user.*;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.enums.UserDisabledEnum;
+import com.katomegumi.zxpicturebackend.enums.UserRoleEnum;
 import com.katomegumi.zxpicturebackend.manager.cache.UserCacheManager;
 import com.katomegumi.zxpicturebackend.manager.cache.VerifyCaptchaCacheManager;
 import com.katomegumi.zxpicturebackend.manager.email.EmailManager;
 import com.katomegumi.zxpicturebackend.manager.email.model.EmailRequest;
 import com.katomegumi.zxpicturebackend.manager.upload.PictureFileUpload;
 import com.katomegumi.zxpicturebackend.manager.upload.modal.UploadPictureResult;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.UserInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dto.user.*;
-import com.katomegumi.zxpicturebackend.model.enums.UserDisabledEnum;
-import com.katomegumi.zxpicturebackend.model.enums.UserRoleEnum;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserVO;
+import com.katomegumi.zxpicturebackend.mapper.UserInfoMapper;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
 import com.katomegumi.zxpicturebackend.service.UserService;
+import com.katomegumi.zxpicturebackend.task.AsyncFileTaskHandler;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.vo.user.UserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,21 +46,20 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.katomegumi.zxpicturebackend.core.constant.CacheConstant.USER.USER_LOGIN_STATE;
-
 
 /**
- * @author Megumi
+ * @author lr
  * @description 针对表【user_info(用户信息表)】的数据库操作Service实现
  * @createDate 2025-05-07 17:17:08
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
-        implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserService {
 
     private final UserInfoMapper userInfoMapper;
+
+    private final AsyncFileTaskHandler asyncFileTaskHandler;
 
     private final EmailManager emailManager;
 
@@ -68,9 +69,13 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     private final PictureFileUpload pictureFileUpload;
 
-    @Value("${verify.code.length}")
     //验证码长度
+    @Value("${verify.code.length}")
     private int length;
+
+    //默认头像地址
+    @Value("${app.default-avatar}")
+    private String defaultAvatar;
 
 
     @Override
@@ -83,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
         String randomCaptcha = EmailUtils.getRandomCaptcha(length);
         verifyCaptchaCacheManager.putCaptchaIntoRedis(randomCaptcha, userEmail);
-        emailManager.sendEmailCaptcha(userEmail,randomCaptcha);
+        emailManager.sendEmailCaptcha(userEmail, randomCaptcha);
     }
 
     @Override
@@ -106,7 +111,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
         //3.校验密码长度 用户名称长度
         ThrowUtils.throwIf(password.length() < 8 || confirmPassword.length() < 8, ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
-        ThrowUtils.throwIf(username.length() > 16||confirmPassword.length() > 16, ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
+        ThrowUtils.throwIf(username.length() > 16 || confirmPassword.length() > 16, ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
 
         //4.校验
         ThrowUtils.throwIf(!password.equals(confirmPassword), ErrorCode.PARAMS_ERROR, "两次密码不一致");
@@ -120,6 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         userInfo.setName(username);
         userInfo.setPassword(DigestUtils.md5DigestAsHex((password + UserConstant.SALT).getBytes()));
         userInfo.setEmail(userEmail);
+        userInfo.setAvatar(defaultAvatar);
         boolean result = this.save(userInfo);
 
         if (!result) {
@@ -141,14 +147,10 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         UserInfo userInfo;
         if (ReUtil.isMatch(RegexPool.EMAIL, emailOrUsername)) {
             //用邮箱去查询
-            userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
-                    .eq(UserInfo::getEmail, emailOrUsername)
-                    .eq(UserInfo::getPassword, encryptPassword));
+            userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getEmail, emailOrUsername).eq(UserInfo::getPassword, encryptPassword));
         } else {
             //反之用用户名去查询
-            userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
-                    .eq(UserInfo::getName, emailOrUsername)
-                    .eq(UserInfo::getPassword, encryptPassword));
+            userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getName, emailOrUsername).eq(UserInfo::getPassword, encryptPassword));
         }
         // 查询都用户不存在
         if (userInfo == null) {
@@ -173,7 +175,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         }
         String randomCaptcha = EmailUtils.getRandomCaptcha(length);
         verifyCaptchaCacheManager.set(CacheConstant.EMAIL.FORGOT + userEmail, randomCaptcha, 5, TimeUnit.MINUTES);
-        emailManager.sendEmailForgotPassword(userEmail,randomCaptcha);
+        emailManager.sendEmailForgotPassword(userEmail, randomCaptcha);
     }
 
 
@@ -219,15 +221,17 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
 
     @Override
     public UserDetailVO getUserDetailById(Long userId) {
-        UserInfo userInfo = userCacheManager.getUserDetailVOCache(userId);
+        UserInfo userInfo = userCacheManager.getUserInfoCache(userId);
         return BeanUtil.copyProperties(userInfo, UserDetailVO.class);
     }
 
     @Override
     public String uploadAvatar(MultipartFile avatarFile) {
-        long userId = StpKit.USER.getLoginIdAsLong();
+        UserInfo currentUserInfo = getCurrentUserInfo();
+        String oldAvatarUrl = currentUserInfo.getAvatar();
+        long userId = currentUserInfo.getId();
         //上传地址前缀 avatar/用户id/图片名称
-        String pathPrefix = "avatar/" + userId + "/";
+        String pathPrefix = "avatar/" + userId;
         UploadPictureResult uploadPictureResult = pictureFileUpload.uploadPicture(avatarFile, pathPrefix, false);
         String avatarUrl = uploadPictureResult.getOriginUrl();
         ThrowUtils.throwIf(StrUtil.isBlank(avatarUrl), ErrorCode.OPERATION_ERROR, "上传头像失败");
@@ -237,6 +241,15 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         boolean result = this.updateById(userInfo);
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "头像更新失败");
 
+        if (StrUtil.isNotBlank(oldAvatarUrl) && !oldAvatarUrl.equals(defaultAvatar)) {
+            try {
+                //这里需要切分因为对象存储需要的是对象key
+                String key = URLUtil.url(oldAvatarUrl).getPath();
+                asyncFileTaskHandler.clearFile(key.substring(1));
+            } catch (Exception e) {
+                log.warn("删除旧头像失败: {}", oldAvatarUrl, e);
+            }
+        }
         userCacheManager.deleteUserCache(userId);
         return avatarUrl;
     }
@@ -247,11 +260,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         ThrowUtils.throwIf(userInfo == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         //是否为本人操作
         Long loginUserId = StpKit.USER.getLoginIdAsLong();
-        ThrowUtils.throwIf(
-                !loginUserId.equals(userEditRequest.getId()),
-                ErrorCode.NO_AUTH_ERROR,
-                "无权限修改他人信息"
-        );
+        ThrowUtils.throwIf(!loginUserId.equals(userEditRequest.getId()), ErrorCode.NO_AUTH_ERROR, "无权限修改他人信息");
         userInfo = BeanUtil.copyProperties(userEditRequest, UserInfo.class);
         boolean result = this.updateById(userInfo);
         if (!result) {
@@ -292,23 +301,13 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
     public PageVO<UserVO> getUserPageListAsManage(UserQueryRequest userQueryRequest) {
         LambdaQueryWrapper<UserInfo> lambdaQueryWrapper = getLambdaQueryWrapper(userQueryRequest);
         Page<UserInfo> page = this.page(userQueryRequest.getPage(UserInfo.class), lambdaQueryWrapper);
-        return new PageVO<>(
-                page.getCurrent(),
-                page.getSize(),
-                page.getTotal(),
-                page.getPages(),
-                Optional.ofNullable(page.getRecords())
-                        .orElse(Collections.emptyList())
-                        .stream()
-                        .map(userInfo -> BeanUtil.copyProperties(userInfo, UserVO.class))
-                        .collect(Collectors.toList())
-        );
+        return new PageVO<>(page.getCurrent(), page.getSize(), page.getTotal(), page.getPages(), Optional.ofNullable(page.getRecords()).orElse(Collections.emptyList()).stream().map(userInfo -> BeanUtil.copyProperties(userInfo, UserVO.class)).collect(Collectors.toList()));
     }
 
     @Override
     public UserInfo getCurrentUserInfo() {
         long userId = StpKit.USER.getLoginIdAsLong();
-        return userCacheManager.getUserDetailVOCache(userId);
+        return userCacheManager.getUserInfoCache(userId);
     }
 
     @Override
@@ -337,15 +336,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo>
         Boolean sortOrder = userQueryRequest.getSortOrder();
 
         LambdaQueryWrapper<UserInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper
-                .like(ObjUtil.isNotNull(userId), UserInfo::getId, userId)
-                .like(StrUtil.isNotBlank(username), UserInfo::getName, username)
-                .like(StrUtil.isNotBlank(userEmail), UserInfo::getEmail, userEmail)
-                .like(StrUtil.isNotBlank(userPhone), UserInfo::getPhone, userPhone)
-                .eq(ObjUtil.isNotNull(vipNumber), UserInfo::getVipNumber, vipNumber)
-                .eq(StrUtil.isNotBlank(userRole), UserInfo::getRole, userRole)
-                .eq(ObjUtil.isNotNull(isVip), UserInfo::getIsVip, isVip)
-                .eq(ObjUtil.isNotNull(isDisabled), UserInfo::getIsDisabled, isDisabled);
+        lambdaQueryWrapper.like(ObjUtil.isNotNull(userId), UserInfo::getId, userId).like(StrUtil.isNotBlank(username), UserInfo::getName, username).like(StrUtil.isNotBlank(userEmail), UserInfo::getEmail, userEmail).like(StrUtil.isNotBlank(userPhone), UserInfo::getPhone, userPhone).eq(ObjUtil.isNotNull(vipNumber), UserInfo::getVipNumber, vipNumber).eq(StrUtil.isNotBlank(userRole), UserInfo::getRole, userRole).eq(ObjUtil.isNotNull(isVip), UserInfo::getIsVip, isVip).eq(ObjUtil.isNotNull(isDisabled), UserInfo::getIsDisabled, isDisabled);
         //构造排序
         if (sortField != null) {
             lambdaQueryWrapper.orderBy(StrUtil.isNotBlank(sortField), sortOrder, SFunctionUtils.getSFunction(UserInfo.class, sortField));

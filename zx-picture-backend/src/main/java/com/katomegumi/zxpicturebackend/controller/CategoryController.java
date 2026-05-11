@@ -2,19 +2,19 @@ package com.katomegumi.zxpicturebackend.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.req.DeleteRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryAddRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryQueryRequest;
-import com.katomegumi.zxpicturebackend.model.dto.category.CategoryUpdateRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.model.vo.category.CategoryVO;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.req.DeleteRequest;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryAddRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryQueryRequest;
+import com.katomegumi.zxpicturebackend.dto.category.CategoryUpdateRequest;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.vo.category.CategoryVO;
 import com.katomegumi.zxpicturebackend.service.PictureCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Megumi
+ * @author lr
  * @description : 图片分类接口(只准管理员操作)
  */
 @RestController

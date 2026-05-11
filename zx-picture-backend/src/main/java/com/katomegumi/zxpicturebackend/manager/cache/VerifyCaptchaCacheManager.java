@@ -2,19 +2,18 @@ package com.katomegumi.zxpicturebackend.manager.cache;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.core.util.RedisUtils;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.common.util.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.BoundHashOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 验证码缓存管理类
  * @createDate : 2025/5/7 下午1:25
  */
@@ -45,13 +44,16 @@ public class VerifyCaptchaCacheManager {
             boundHashOps.expire(5, TimeUnit.MINUTES);
             return;
         }
-        if(StrUtil.isNotBlank(sendCount)&&Integer.parseInt(sendCount)>=5) {
+        if (sendCount != null && StrUtil.isNotBlank(sendCount) && Integer.parseInt(sendCount) >= 5) {
             //覆盖设置 24小时后过期
             boundHashOps.expire(24, TimeUnit.HOURS);
-            throw new BusinessException(ErrorCode.OPERATION_ERROR,"验证码发送频繁,24小时重试");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码发送频繁,24小时重试");
         }
         if (StrUtil.isNotBlank(lastSendTime)){
-            long elapsedTime = System.currentTimeMillis() - Long.parseLong(lastSendTime);
+            long elapsedTime = 0;
+            if (lastSendTime != null) {
+                elapsedTime = System.currentTimeMillis() - Long.parseLong(lastSendTime);
+            }
             if (elapsedTime < 1000 * 60) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR,"验证码发送频繁,1分钟重试");
             }
@@ -67,7 +69,7 @@ public class VerifyCaptchaCacheManager {
      * 校验注册验证码
      * @param key 键值
      * @param captcha 验证码
-     * @return
+     * @return 校验结果
      */
     public boolean verifyCaptchaOk(String key,String captcha) {
         return ObjectUtil.equals(redisUtils.hGet(key, CacheConstant.EMAIL.CAPTCHA), captcha);
@@ -77,7 +79,7 @@ public class VerifyCaptchaCacheManager {
      * 校验重置验证码
      * @param key 键值
      * @param captcha 验证码
-     * @return
+     * @return 校验结果
      */
     public boolean verifyForgotCaptchaOk(String key,String captcha) {
         return ObjectUtil.equals(redisUtils.get(key),captcha);

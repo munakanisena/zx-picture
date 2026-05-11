@@ -6,7 +6,7 @@ import cn.hutool.core.util.ObjUtil;
 import lombok.Getter;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 图片编辑消息类型枚举类
  */
 @Getter

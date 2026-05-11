@@ -1,10 +1,10 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.handler;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceTypeEnum;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
 import com.katomegumi.zxpicturebackend.service.PictureService;
 import com.katomegumi.zxpicturebackend.service.SpaceService;
 import com.katomegumi.zxpicturebackend.service.UserService;
@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
- * @author Megumi
+ * @author lr
  * @description websocket握手拦截器
  */
 @Component

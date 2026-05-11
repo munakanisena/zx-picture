@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 邮件地址
  * @createDate : 2025/5/7 下午1:44
  */

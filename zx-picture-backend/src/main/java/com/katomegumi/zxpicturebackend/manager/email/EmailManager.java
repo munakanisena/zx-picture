@@ -1,10 +1,6 @@
 package com.katomegumi.zxpicturebackend.manager.email;
 
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.core.util.EmailUtils;
-import com.katomegumi.zxpicturebackend.manager.cache.VerifyCaptchaCacheManager;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +14,9 @@ import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.concurrent.TimeUnit;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 邮件发送客户端
  * @createDate : 2025/5/3 下午7:37
  */
@@ -34,7 +29,6 @@ public class EmailManager {
 
     private final TemplateEngine  templateEngine;
 
-    private final VerifyCaptchaCacheManager verifyCaptchaCacheManager;
 
     //发件人名称
     @Value("${spring.mail.nickname}")

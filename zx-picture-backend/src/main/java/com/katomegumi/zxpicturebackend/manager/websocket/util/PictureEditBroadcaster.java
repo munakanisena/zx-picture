@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description : 图片编辑广播
  * @createDate : 2025/7/17 上午11:01
  */
@@ -92,7 +92,6 @@ public class PictureEditBroadcaster {
      *
      * @param pictureId                  图片id
      * @param pictureEditResponseMessage 需要传递的消息
-     * @throws Exception
      */
     public void broadcastToPicture(Long pictureId, PictureEditResponseMessage pictureEditResponseMessage) throws Exception {
         broadcastToPicture(pictureId, pictureEditResponseMessage, null);

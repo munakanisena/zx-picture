@@ -2,21 +2,21 @@ package com.katomegumi.zxpicturebackend.controller;
 
 
 import cn.hutool.core.util.ObjectUtil;
-import com.katomegumi.zxpicturebackend.core.annotation.AuthCheck;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.req.DeleteRequest;
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
-import com.katomegumi.zxpicturebackend.core.constant.ApiRouterConstant;
-import com.katomegumi.zxpicturebackend.core.constant.UserConstant;
-import com.katomegumi.zxpicturebackend.manager.auth.annotation.SaUserCheckLogin;
-import com.katomegumi.zxpicturebackend.model.dto.space.*;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceTeamDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceVO;
+import com.katomegumi.zxpicturebackend.common.constant.ApiRouterConstant;
+import com.katomegumi.zxpicturebackend.common.constant.UserConstant;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.req.DeleteRequest;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.dto.space.*;
+import com.katomegumi.zxpicturebackend.security.annotation.AuthCheck;
+import com.katomegumi.zxpicturebackend.security.annotation.SaUserCheckLogin;
 import com.katomegumi.zxpicturebackend.service.SpaceService;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceTeamDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,7 @@ import java.util.List;
 
 
 /**
- * @author Megumi
+ * @author lr
  */
 @SaUserCheckLogin
 @RestController

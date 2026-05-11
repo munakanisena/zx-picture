@@ -3,9 +3,9 @@ package com.katomegumi.zxpicturebackend.manager.cos;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONUtil;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.config.CosClientConfig;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.exception.CosClientException;
 import com.qcloud.cos.exception.CosServiceException;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Megumi
+ * @author lr
  * @description 腾讯云对象存储服务
  */
 @Component
@@ -37,7 +37,6 @@ public class CosManager {
     private final COSClient cosClient;
 
 
-
     /**
      * 上传对象
      *
@@ -45,8 +44,7 @@ public class CosManager {
      * @param file 文件
      */
     public PutObjectResult putObject(String key, File file) {
-        PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucketName(), key,
-                file);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucketName(), key, file);
         return cosClient.putObject(putObjectRequest);
     }
 
@@ -65,7 +63,7 @@ public class CosManager {
      * <p>
      * <a href="https://cloud.tencent.com/document/product/436/115609">腾讯 COS 数据万象</a>
      *
-     * @param key    图片地址
+     * @param key    图片地址（对象键）
      * @param file   文件
      * @param openWx 开启数据万象; true: 开启; false: 关闭 (是否对图片进行处理)
      */
@@ -107,7 +105,6 @@ public class CosManager {
      * 删除对象存储的图片
      *
      * @param key 文件资源地址
-     * @throws CosClientException
      */
     public void deleteObject(String key) throws CosClientException {
         try {

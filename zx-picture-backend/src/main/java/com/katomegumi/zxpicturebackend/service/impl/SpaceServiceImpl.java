@@ -9,31 +9,30 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.katomegumi.zxpicturebackend.core.common.exception.BusinessException;
-import com.katomegumi.zxpicturebackend.core.common.exception.ErrorCode;
-import com.katomegumi.zxpicturebackend.core.common.exception.ThrowUtils;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.util.SFunctionUtils;
-import com.katomegumi.zxpicturebackend.manager.auth.SpaceUserAuthManager;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
-import com.katomegumi.zxpicturebackend.manager.task.AsyncFileTaskHandler;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.SpaceUser;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.PictureInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dao.mapper.SpaceInfoMapper;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceActiveRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceEditRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceQueryRequest;
-import com.katomegumi.zxpicturebackend.model.dto.space.SpaceUpdateRequest;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceLevelEnum;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceRoleEnum;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceTypeEnum;
-import com.katomegumi.zxpicturebackend.model.enums.UserRoleEnum;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceTeamDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.space.info.SpaceVO;
+import com.katomegumi.zxpicturebackend.common.exception.BusinessException;
+import com.katomegumi.zxpicturebackend.common.exception.ErrorCode;
+import com.katomegumi.zxpicturebackend.common.exception.ThrowUtils;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.util.SFunctionUtils;
+import com.katomegumi.zxpicturebackend.security.permission.SpaceUserAuthManager;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
+import com.katomegumi.zxpicturebackend.task.AsyncFileTaskHandler;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
+import com.katomegumi.zxpicturebackend.entity.SpaceUser;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.mapper.PictureInfoMapper;
+import com.katomegumi.zxpicturebackend.mapper.SpaceInfoMapper;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceActiveRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceEditRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceQueryRequest;
+import com.katomegumi.zxpicturebackend.dto.space.SpaceUpdateRequest;
+import com.katomegumi.zxpicturebackend.enums.SpaceLevelEnum;
+import com.katomegumi.zxpicturebackend.enums.SpaceRoleEnum;
+import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceTeamDetailVO;
+import com.katomegumi.zxpicturebackend.vo.space.info.SpaceVO;
 import com.katomegumi.zxpicturebackend.service.SpaceService;
 import com.katomegumi.zxpicturebackend.service.SpaceUserService;
 import com.katomegumi.zxpicturebackend.service.UserService;
@@ -49,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【space_info(空间信息表)】的数据库操作Service实现
  * @createDate 2025-06-10 20:09:10
  */
@@ -125,7 +124,6 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceInfoMapper, SpaceInfo>
     public void editSpace(SpaceEditRequest spaceEditRequest) {
         Long spaceId = spaceEditRequest.getId();
         this.existedSpaceBySpaceId(spaceId);
-        long userId = StpKit.USER.getLoginIdAsLong();
         SpaceInfo oldSpaceInfo = this.getById(spaceId);
         //校验权限
         UserInfo userInfo = userService.getCurrentUserInfo();
@@ -295,7 +293,6 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceInfoMapper, SpaceInfo>
                 return;
             }
         }
-
         throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }
 

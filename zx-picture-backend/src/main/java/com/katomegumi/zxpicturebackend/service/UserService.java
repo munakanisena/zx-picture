@@ -1,16 +1,16 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.dto.user.*;
 import com.katomegumi.zxpicturebackend.manager.email.model.EmailRequest;
-import com.katomegumi.zxpicturebackend.model.dao.entity.UserInfo;
-import com.katomegumi.zxpicturebackend.model.dto.user.*;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserDetailVO;
-import com.katomegumi.zxpicturebackend.model.vo.user.UserVO;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
+import com.katomegumi.zxpicturebackend.vo.user.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【user_info(用户信息表)】的数据库操作Service
  * @createDate 2025-05-07 17:17:08
  */

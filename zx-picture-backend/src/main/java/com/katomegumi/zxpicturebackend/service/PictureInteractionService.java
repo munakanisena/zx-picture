@@ -1,13 +1,13 @@
 package com.katomegumi.zxpicturebackend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInteraction;
-import com.katomegumi.zxpicturebackend.model.dto.picture.PictureInteractionRequest;
+import com.katomegumi.zxpicturebackend.entity.PictureInteraction;
+import com.katomegumi.zxpicturebackend.dto.picture.PictureInteractionRequest;
 
 import java.util.List;
 
 /**
- * @author lirui
+ * @author lr
  * @description 针对表【picture_interaction(图片交互表)】的数据库操作Service
  * @createDate 2025-05-27 18:32:56
  */

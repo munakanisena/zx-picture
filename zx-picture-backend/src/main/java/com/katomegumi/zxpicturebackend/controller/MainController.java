@@ -1,14 +1,14 @@
 package com.katomegumi.zxpicturebackend.controller;
 
-import com.katomegumi.zxpicturebackend.core.common.resp.BaseResponse;
-import com.katomegumi.zxpicturebackend.core.common.util.ResultUtils;
+import com.katomegumi.zxpicturebackend.common.resp.BaseResponse;
+import com.katomegumi.zxpicturebackend.common.util.ResultUtils;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Megumi
+ * @author lr
  * @description : 测试
  */
 @RestController

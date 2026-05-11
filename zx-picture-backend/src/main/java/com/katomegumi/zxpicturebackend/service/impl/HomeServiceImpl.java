@@ -2,20 +2,20 @@ package com.katomegumi.zxpicturebackend.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.katomegumi.zxpicturebackend.core.common.resp.PageVO;
-import com.katomegumi.zxpicturebackend.core.constant.CacheConstant;
-import com.katomegumi.zxpicturebackend.manager.auth.StpKit.StpKit;
+import com.katomegumi.zxpicturebackend.common.resp.PageVO;
+import com.katomegumi.zxpicturebackend.common.constant.CacheConstant;
+import com.katomegumi.zxpicturebackend.security.sa.StpKit;
 import com.katomegumi.zxpicturebackend.manager.cache.HomeCategoryCacheManager;
 import com.katomegumi.zxpicturebackend.manager.cache.HomePictureCacheManager;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInfo;
-import com.katomegumi.zxpicturebackend.model.dao.entity.PictureInteraction;
-import com.katomegumi.zxpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionStatusEnum;
-import com.katomegumi.zxpicturebackend.model.enums.PictureInteractionTypeEnum;
-import com.katomegumi.zxpicturebackend.model.enums.PictureReviewStatusEnum;
-import com.katomegumi.zxpicturebackend.model.enums.SpaceTypeEnum;
-import com.katomegumi.zxpicturebackend.model.vo.category.CategoryVO;
-import com.katomegumi.zxpicturebackend.model.vo.picture.PictureHomeVO;
+import com.katomegumi.zxpicturebackend.entity.PictureInfo;
+import com.katomegumi.zxpicturebackend.entity.PictureInteraction;
+import com.katomegumi.zxpicturebackend.dto.picture.PictureQueryRequest;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionStatusEnum;
+import com.katomegumi.zxpicturebackend.enums.PictureInteractionTypeEnum;
+import com.katomegumi.zxpicturebackend.enums.PictureReviewStatusEnum;
+import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
+import com.katomegumi.zxpicturebackend.vo.category.CategoryVO;
+import com.katomegumi.zxpicturebackend.vo.picture.PictureHomeVO;
 import com.katomegumi.zxpicturebackend.service.HomeService;
 import com.katomegumi.zxpicturebackend.service.PictureInteractionService;
 import com.katomegumi.zxpicturebackend.service.PictureService;
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author : Megumi
+ * @author : lr
  * @description :首页模块 服务实现
  * @createDate : 2025/5/28 下午1:19
  */
