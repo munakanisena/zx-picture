@@ -33,7 +33,7 @@ public class CapturePictureManager {
         List<CapturePictureResult> capturePictureResults = capturePictureManager
                 .capturePicture(CaptureSourceEnum.BING.getUrl(), "风景", 10, 10);
 //        System.out.println(capturePictureResults);
-        System.out.println(JSONUtil.parse(capturePictureResults));
+
     }
 
 

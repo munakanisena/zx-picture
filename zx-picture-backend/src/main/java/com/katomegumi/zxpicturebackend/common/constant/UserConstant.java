@@ -3,7 +3,6 @@ package com.katomegumi.zxpicturebackend.common.constant;
 import lombok.experimental.UtilityClass;
 
 /**
- *
  * @author lr
  * @description user常量类
  */
@@ -22,9 +21,17 @@ public class UserConstant {
 
     // endregion
 
-    // 防止缓存穿透 设置默认值
+    /**
+     * 防止缓存穿透 设置默认值
+     */
     public static final String EMPTY_USER = "empty_user";
-
-    //加盐值
+    /**
+     * 密码 加盐值
+     */
     public static final String SALT = "Megumi";
+
+    /**
+     * websocket 会话参数
+     */
+    public static final String ATTR_USER_INFO = "userInfo";
 }

@@ -2,13 +2,13 @@ package com.katomegumi.zxpicturebackend.manager.websocket.handler;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.manager.websocket.disruptor.PictureEditEventProducer;
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
 import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditResponseMessage;
 import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEditMessageTypeEnum;
-import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategy;
 import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategyFactory;
 import com.katomegumi.zxpicturebackend.manager.websocket.util.PictureEditBroadcaster;
-import com.katomegumi.zxpicturebackend.entity.UserInfo;
 import com.katomegumi.zxpicturebackend.vo.user.UserDetailVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.Map;
+import static com.katomegumi.zxpicturebackend.common.constant.PictureConstant.ATTR_PICTURE_ID;
+import static com.katomegumi.zxpicturebackend.common.constant.UserConstant.ATTR_USER_INFO;
 
 /**
  * @author lr
@@ -32,6 +33,11 @@ public class PictureEditHandler extends TextWebSocketHandler {
     private final PictureEditBroadcaster pictureEditBroadcaster;
 
     /**
+     * 消息队列生产者
+     */
+    private final PictureEditEventProducer pictureEditEventProducer;
+
+    /**
      * 首次初次连接成功时
      *
      * @param session 当前会话
@@ -39,8 +45,8 @@ public class PictureEditHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         //写入会话
-        Long pictureId = (Long) session.getAttributes().get("pictureId");
-        UserInfo userInfo = (UserInfo) session.getAttributes().get("userInfo");
+        Long pictureId = (Long) session.getAttributes().get(ATTR_PICTURE_ID);
+        UserInfo userInfo = (UserInfo) session.getAttributes().get(ATTR_USER_INFO);
         //写入当前图片 会话集合
         pictureEditBroadcaster.addSession(pictureId, session);
         //构造响应
@@ -60,17 +66,12 @@ public class PictureEditHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        Map<String, Object> attributes = session.getAttributes();
-        Long pictureId = (Long) attributes.get("pictureId");
-        UserInfo userInfo = (UserInfo) attributes.get("userInfo");
-
+        Long pictureId = (Long) session.getAttributes().get(ATTR_PICTURE_ID);
+        UserInfo userInfo = (UserInfo) session.getAttributes().get(ATTR_USER_INFO);
         //执行退出策略
-        pictureEditMessageStrategyFactory.getStrategy(PictureEditMessageTypeEnum.EXIT_EDIT.getKey())
-                .handle(null, pictureId, session, userInfo);
-
+        pictureEditMessageStrategyFactory.getStrategy(PictureEditMessageTypeEnum.EXIT_EDIT.getKey()).handle(null, pictureId, session, userInfo);
         //移除用户的编辑状态
         pictureEditBroadcaster.removeSession(pictureId, session);
-
         //构造响应
         PictureEditResponseMessage pictureEditResponseMessage = new PictureEditResponseMessage();
         pictureEditResponseMessage.setType(PictureEditMessageTypeEnum.INFO.getKey());
@@ -82,19 +83,15 @@ public class PictureEditHandler extends TextWebSocketHandler {
 
     /**
      * 接收消息后 触发
+     *
      * @param session 当前会话信息
      * @param message 客户端传来的消息
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        //获取session 属性(对象)
-        Long pictureId = (Long) session.getAttributes().get("pictureId");
-        UserInfo userInfo = (UserInfo) session.getAttributes().get("userInfo");
+        Long pictureId = (Long) session.getAttributes().get(ATTR_PICTURE_ID);
+        UserInfo userInfo = (UserInfo) session.getAttributes().get(ATTR_USER_INFO);
         PictureEditRequestMessage pictureEditRequestMessage = JSONUtil.toBean(message.getPayload(), PictureEditRequestMessage.class);
-        String type = pictureEditRequestMessage.getType();
-
-        PictureEditMessageStrategy strategy = pictureEditMessageStrategyFactory.getStrategy(type);
-        strategy.handle(pictureEditRequestMessage, pictureId, session, userInfo);
+        pictureEditEventProducer.publishEvent(pictureEditRequestMessage, session, userInfo, pictureId);
     }
-
 }

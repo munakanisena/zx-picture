@@ -111,7 +111,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> imple
 
         //3.校验密码长度 用户名称长度
         ThrowUtils.throwIf(password.length() < 8 || confirmPassword.length() < 8, ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
-        ThrowUtils.throwIf(username.length() > 16 || confirmPassword.length() > 16, ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
+        ThrowUtils.throwIf(username.length() > 16 , ErrorCode.PARAMS_ERROR, "用户账号长度大于16位");
 
         //4.校验
         ThrowUtils.throwIf(!password.equals(confirmPassword), ErrorCode.PARAMS_ERROR, "两次密码不一致");
@@ -170,7 +170,7 @@ public class UserServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> imple
         String userEmail = emailRequest.getUserEmail();
         ThrowUtils.throwIf(!ReUtil.isMatch(RegexPool.EMAIL, userEmail), ErrorCode.PARAMS_ERROR, "邮箱格式错误");
         Long count = userInfoMapper.selectCount(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getEmail, userEmail));
-        if (count < 0) {
+        if (count == 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
         String randomCaptcha = EmailUtils.getRandomCaptcha(length);

@@ -5,8 +5,8 @@ import com.katomegumi.zxpicturebackend.entity.PictureInfo;
 import com.katomegumi.zxpicturebackend.entity.SpaceInfo;
 import com.katomegumi.zxpicturebackend.entity.UserInfo;
 import com.katomegumi.zxpicturebackend.enums.SpaceTypeEnum;
-import com.katomegumi.zxpicturebackend.service.PictureService;
-import com.katomegumi.zxpicturebackend.service.SpaceService;
+import com.katomegumi.zxpicturebackend.mapper.PictureInfoMapper;
+import com.katomegumi.zxpicturebackend.mapper.SpaceInfoMapper;
 import com.katomegumi.zxpicturebackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,9 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+import static com.katomegumi.zxpicturebackend.common.constant.PictureConstant.ATTR_PICTURE_ID;
+import static com.katomegumi.zxpicturebackend.common.constant.UserConstant.ATTR_USER_INFO;
+
 /**
  * @author lr
  * @description websocket握手拦截器
@@ -29,13 +32,9 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class WsHandshakeInterceptor implements HandshakeInterceptor {
-
-
-    private static final String ATTR_USER_INFO = "userInfo";
-    private static final String ATTR_PICTURE_ID = "pictureId";
     private final UserService userService;
-    private final PictureService pictureService;
-    private final SpaceService spaceService;
+    private final PictureInfoMapper pictureInfoMapper;
+    private final SpaceInfoMapper spaceInfoMapper;
 
     /**
      * 在握手之前执行该方法，判断是否允许连接，返回true表示允许(做权限校验)
@@ -60,7 +59,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             log.error("缺少图片参数，拒绝握手");
             return false;
         }
-        PictureInfo pictureInfo = pictureService.getById(pictureId);
+        PictureInfo pictureInfo = pictureInfoMapper.selectById(pictureId);
         if (pictureInfo == null) {
             log.error("图片不存在");
             return false;
@@ -78,7 +77,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
             log.error("空间id不存在");
             return false;
         } else {
-            SpaceInfo spaceInfo = spaceService.getById(spaceId);
+            SpaceInfo spaceInfo = spaceInfoMapper.selectById(spaceId);
             if (ObjectUtil.isEmpty(spaceInfo)) {
                 log.error("空间不存在");
                 return false;

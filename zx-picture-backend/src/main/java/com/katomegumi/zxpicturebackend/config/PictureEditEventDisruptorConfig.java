@@ -22,7 +22,6 @@ public class PictureEditEventDisruptorConfig {
 
     @Bean("pictureEditEventDisruptor")
     public Disruptor<PictureEditEvent> messageModelRingBuffer() {
-        //设置队列空间
         // ringBuffer 的大小
         int bufferSize = 1024 * 256;
         Disruptor<PictureEditEvent> disruptor = new Disruptor<>(PictureEditEvent::new, bufferSize, ThreadFactoryBuilder.create().setNamePrefix("pictureEditEventDisruptor").build());

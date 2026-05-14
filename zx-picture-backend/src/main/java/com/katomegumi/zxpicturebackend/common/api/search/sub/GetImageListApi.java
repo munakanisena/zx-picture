@@ -26,7 +26,7 @@ public class GetImageListApi {
     public static void main(String[] args) {
         String url = "https://graph.baidu.com/ajax/pcsimi?carousel=503&entrance=GENERAL&extUiData%5BisLogoShow%5D=1&inspire=general_pc&limit=30&next=2&render_type=card&session_id=4985731586020618930&sign=12672e97cd54acd88139901741263185&tk=d9798&tpl_from=pc&page=1&";
         List<SearchPictureResult> imageList = getImageListApi(url, 1, 10);
-        System.out.println("搜索成功" + imageList);
+        log.info("搜索成功{}", imageList);
     }
 
     /**

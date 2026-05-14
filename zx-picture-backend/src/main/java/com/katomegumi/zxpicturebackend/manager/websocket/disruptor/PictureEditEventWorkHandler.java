@@ -1,11 +1,14 @@
 package com.katomegumi.zxpicturebackend.manager.websocket.disruptor;
 
-import com.katomegumi.zxpicturebackend.manager.websocket.handler.PictureEditHandler;
-import com.katomegumi.zxpicturebackend.service.UserService;
+import com.katomegumi.zxpicturebackend.entity.UserInfo;
+import com.katomegumi.zxpicturebackend.manager.websocket.model.PictureEditRequestMessage;
+import com.katomegumi.zxpicturebackend.manager.websocket.model.enums.PictureEditMessageTypeEnum;
+import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategy;
+import com.katomegumi.zxpicturebackend.manager.websocket.strategy.PictureEditMessageStrategyFactory;
 import com.lmax.disruptor.WorkHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import javax.annotation.Resource;
 
@@ -17,40 +20,18 @@ import javax.annotation.Resource;
 @Slf4j
 @Component
 public class PictureEditEventWorkHandler implements WorkHandler<PictureEditEvent> {
-
     @Resource
-    @Lazy
-    private PictureEditHandler pictureEditHandler;
-
-    @Resource
-    private UserService userService;
+    private PictureEditMessageStrategyFactory pictureEditMessageStrategyFactory;
 
     @Override
     public void onEvent(PictureEditEvent event) throws Exception {
-//        PictureEditRequestMessage pictureEditRequestMessage = event.getPictureEditRequestMessage();
-//        WebSocketSession session = event.getSession();
-//        UserInfo user = event.getUser();
-//        Long pictureId = event.getPictureId();
-//        // 获取到消息类别
-//        String type = pictureEditRequestMessage.getType();
-//        PictureEditMessageTypeEnum pictureEditMessageTypeEnum = PictureEditMessageTypeEnum.valueOf(type);
-//        // 调用对应的消息处理方法
-//        switch (pictureEditMessageTypeEnum) {
-//            case ENTER_EDIT:
-//                pictureEditHandler.handleEnterEditMessage(pictureEditRequestMessage, session, user, pictureId);
-//                break;
-//            case EDIT_ACTION:
-//                pictureEditHandler.handleEditActionMessage(pictureEditRequestMessage, session, user, pictureId);
-//                break;
-//            case EXIT_EDIT:
-//                pictureEditHandler.handleExitEditMessage(pictureEditRequestMessage, session, user, pictureId);
-//                break;
-//            default:
-//                PictureEditResponseMessage pictureEditResponseMessage = new PictureEditResponseMessage();
-//                pictureEditResponseMessage.setType(PictureEditMessageTypeEnum.ERROR.getValue());
-//                pictureEditResponseMessage.setMessage("消息类型错误");
-////                pictureEditResponseMessage.setUser(.getUserVO(user));
-//                session.sendMessage(new TextMessage(JSONUtil.toJsonStr(pictureEditResponseMessage)));
-//        }
+        PictureEditRequestMessage pictureEditRequestMessage = event.getPictureEditRequestMessage();
+        WebSocketSession session = event.getSession();
+        UserInfo userInfo = event.getUser();
+        Long pictureId = event.getPictureId();
+        // 获取到消息类别
+        String type = pictureEditRequestMessage.getType();
+        PictureEditMessageStrategy strategy = pictureEditMessageStrategyFactory.getStrategy(type);
+        strategy.handle(pictureEditRequestMessage, pictureId, session, userInfo);
     }
 }

@@ -53,7 +53,7 @@ public class BaiLianApi {
         Request request = new Request.Builder().url(BaiLianConfig.CREATE_OUT_PAINTING_TASK_URL).header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue()).header(Header.AUTHORIZATION.getValue(), baiLianConfig.getBearer()).header("X-DashScope-Async", "enable").post(requestBody).build();
 
         try (Response response = okHttpClient.newCall(request).execute()) {
-            System.out.println(request);
+
             if (!response.isSuccessful()) {
                 log.error("阿里百炼扩图任务失败:状态码{},信息{}", response.code(), response.message());
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI扩图失败");

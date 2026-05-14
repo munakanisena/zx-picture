@@ -34,5 +34,10 @@ public class PictureConstant {
      * 图片分类 顶层父分类 id默认0
      */
     public static final long PICTURE_CATEGORY_ROOT_PARENT_ID = 0L;
+
+    /**
+     * websocket 会话参数
+     */
+    public static final String ATTR_PICTURE_ID = "pictureId";
 }
 

@@ -26,7 +26,7 @@ public class GetImagePageUrlApi {
         // 测试以图搜图功能
         String imageUrl = "https://www.codefather.cn/logo.png";
         String result = getImagePageUrl(imageUrl);
-        System.out.println("搜索成功，结果 URL：" + result);
+        log.info("搜索成功，结果 URL：{}", result);
     }
 
     /**
